@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
-import {
-  Box,
-  Button,
-  Input,
-  VStack,
-  Heading,
-  ScrollView
-} from 'native-base';
+import { Box, Button, Input, VStack, Heading, ScrollView } from 'native-base';
+import { useRouter } from 'expo-router';
 import { registerUser } from '../services/auth';
 import { isEmailValid, isPhoneValid } from '../utils/validation';
 
-export default function RegisterScreen({ navigation }: any) {
+export default function Register() {
+  const router = useRouter();
   const [form, setForm] = useState({
     name: '',
     surname: '',
@@ -21,23 +16,18 @@ export default function RegisterScreen({ navigation }: any) {
     address: '',
   });
 
-  const handleChange = (key: string, value: string) => {
+  const handleChange = (key: string, value: string) =>
     setForm({ ...form, [key]: value });
-  };
 
   const validateForm = () => {
-    if (Object.values(form).some(v => v.trim() === '')) {
+    if (Object.values(form).some(v => v.trim() === ''))
       return 'All fields are required';
-    }
-    if (!isEmailValid(form.email)) {
-      return 'Invalid email format';
-    }
-    if (form.password.length < 6) {
+    if (!isEmailValid(form.email))
+      return 'Invalid email address';
+    if (form.password.length < 6)
       return 'Password must be at least 6 characters';
-    }
-    if (!isPhoneValid(form.contactNumber)) {
+    if (!isPhoneValid(form.contactNumber))
       return 'Contact number must be at least 10 digits';
-    }
     return null;
   };
 
@@ -50,8 +40,8 @@ export default function RegisterScreen({ navigation }: any) {
 
     try {
       await registerUser(form);
-      Alert.alert('Success', 'Account created successfully');
-      navigation.navigate('Login');
+      Alert.alert('Success', 'Account created');
+      router.replace('/screens/login');
     } catch (err: any) {
       Alert.alert('Error', err.message);
     }
@@ -59,8 +49,8 @@ export default function RegisterScreen({ navigation }: any) {
 
   return (
     <ScrollView>
-      <Box p="5">
-        <Heading mb="5">Create Account</Heading>
+      <Box p="6">
+        <Heading mb="5">Register</Heading>
 
         <VStack space={3}>
           <Input placeholder="Name" onChangeText={v => handleChange('name', v)} />
@@ -71,10 +61,10 @@ export default function RegisterScreen({ navigation }: any) {
           <Input placeholder="Address" onChangeText={v => handleChange('address', v)} />
 
           <Button mt="4" onPress={handleRegister}>
-            Register
+            Create Account
           </Button>
 
-          <Button variant="link" onPress={() => navigation.navigate('Login')}>
+          <Button variant="link" onPress={() => router.push('/screens/login')}>
             Already have an account? Login
           </Button>
         </VStack>

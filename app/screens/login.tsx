@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
-import {
-  Box,
-  Button,
-  Input,
-  VStack,
-  Heading
-} from 'native-base';
+import { Box, Button, Input, VStack, Heading } from 'native-base';
+import { useRouter } from 'expo-router';
 import { loginUser } from '../services/auth';
 import { isEmailValid } from '../utils/validation';
 
-export default function LoginScreen({ navigation }: any) {
+export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -21,20 +17,21 @@ export default function LoginScreen({ navigation }: any) {
     }
 
     if (!isEmailValid(email)) {
-      Alert.alert('Error', 'Invalid email format');
+      Alert.alert('Error', 'Invalid email address');
       return;
     }
 
     try {
       await loginUser(email, password);
-      Alert.alert('Success', 'Logged in successfully');
+      Alert.alert('Success', 'Welcome back!');
+      router.replace('/screens/home');
     } catch (err: any) {
       Alert.alert('Login Failed', err.message);
     }
   };
 
   return (
-    <Box p="5">
+    <Box p="6">
       <Heading mb="5">Login</Heading>
 
       <VStack space={3}>
@@ -45,8 +42,8 @@ export default function LoginScreen({ navigation }: any) {
           Login
         </Button>
 
-        <Button variant="link" onPress={() => navigation.navigate('Register')}>
-          Don't have an account? Register
+        <Button variant="link" onPress={() => router.push('/screens/register')}>
+          Don’t have an account? Register
         </Button>
       </VStack>
     </Box>
