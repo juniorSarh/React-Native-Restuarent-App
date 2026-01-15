@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "310933707368",
+    "project_id": "restuarantapp-22f38",
+    "storage_bucket": "restuarantapp-22f38.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310933707368:android:9c6700b71c9e65060139dd",
+        "android_client_info": {
+          "package_name": "com.royalty.Royalty_Restuarant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBl3LPich5cNr-n6B6mrLEC0ka4ap5Xqt4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
