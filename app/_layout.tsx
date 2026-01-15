@@ -1,12 +1,15 @@
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
+import { NativeBaseProvider } from 'native-base';
 
 export default function RootLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" options={{ title: "Landing" }} />
-      <Stack.Screen name="login" options={{ title: "Login" }} />
-      <Stack.Screen name="register" options={{ title: "Register" }} />
-      <Stack.Screen name="home" options={{ title: "Home" }} />
-    </Stack>
+    <NativeBaseProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="register" />
+        <Stack.Screen name="home" />
+      </Stack>
+    </NativeBaseProvider>
   );
 }

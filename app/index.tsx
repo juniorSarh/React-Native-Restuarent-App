@@ -18,21 +18,21 @@ export default function LandingScreen() {
       <View style={styles.buttons}>
         <Button
           title="Login"
-          onPress={() => router.push("/login")}
+          onPress={() => router.push("/screens/login")}
           buttonStyle={styles.button}
         />
 
         <Button
           title="Register"
           type="outline"
-          onPress={() => router.push("/register")}
+          onPress={() => router.push("/screens/register")}
           buttonStyle={styles.button}
         />
 
         <Button
           title="View Menu"
           type="clear"
-          onPress={() => router.push("/home")}
+          onPress={() => router.push("/screens/home")}
         />
       </View>
     </View>
