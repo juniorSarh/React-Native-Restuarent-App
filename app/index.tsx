@@ -1,7 +1,10 @@
-import { View, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { StyleSheet, View } from "react-native";
 import { Button, Text } from "react-native-elements";
 
-export default function LandingScreen({ navigation }: any) {
+export default function LandingScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text h2 style={styles.title}>
@@ -15,21 +18,21 @@ export default function LandingScreen({ navigation }: any) {
       <View style={styles.buttons}>
         <Button
           title="Login"
-          onPress={() => navigation.navigate("Login")}
+          onPress={() => router.push("/login")}
           buttonStyle={styles.button}
         />
 
         <Button
           title="Register"
           type="outline"
-          onPress={() => navigation.navigate("Register")}
+          onPress={() => router.push("/register")}
           buttonStyle={styles.button}
         />
 
         <Button
           title="View Menu"
           type="clear"
-          onPress={() => navigation.navigate("Home")}
+          onPress={() => router.push("/home")}
         />
       </View>
     </View>
