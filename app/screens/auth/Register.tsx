@@ -3,7 +3,7 @@ import { Input, Button, Text } from "react-native-elements";
 import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../../services/firebase";
+import { auth, db } from "../../services/Firebase";
 
 export default function RegisterScreen({ navigation }: any) {
   const [form, setForm] = useState({

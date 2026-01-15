@@ -1,3 +1,4 @@
+import FoodCard from "@/app/components/FoodCard";
 import { View, FlatList, Image, StyleSheet } from "react-native";
 import { Text, Card } from "react-native-elements";
 
@@ -27,11 +28,11 @@ export default function HomeScreen() {
         data={FOOD}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Card>
+          <FoodCard>
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text h4>{item.name}</Text>
             <Text>R {item.price}</Text>
-          </Card>
+          </FoodCard>
         )}
       />
     </View>
