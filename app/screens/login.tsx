@@ -21,7 +21,7 @@ export default function LoginScreen() {
 
     try {
       await loginUser(email, password);
-      router.replace('/');
+      router.replace('/screens/home');
     } catch (err: any) {
       Alert.alert('Login Failed', err.message);
     }

@@ -36,7 +36,7 @@ export default function RegisterScreen() {
     try {
       await registerUser(form);
       Alert.alert('Success', 'Account created');
-      router.replace('/');
+      router.replace('/screens/home');
     } catch (err: any) {
       Alert.alert('Registration Failed', err.message);
     }

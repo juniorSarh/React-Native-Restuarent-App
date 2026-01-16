@@ -6,9 +6,9 @@ export default function HomeScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to tabs after successful authentication
+    // Redirect to tabs/home after successful authentication
     const timer = setTimeout(() => {
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/home');
     }, 100);
     
     return () => clearTimeout(timer);
