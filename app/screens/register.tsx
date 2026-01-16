@@ -36,7 +36,7 @@ export default function RegisterScreen() {
     try {
       await registerUser(form);
       Alert.alert('Success', 'Account created');
-      router.replace('/screens/home');
+      router.replace('/');
     } catch (err: any) {
       Alert.alert('Registration Failed', err.message);
     }
@@ -48,6 +48,7 @@ export default function RegisterScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.brandName}>Restaurant</Text>
