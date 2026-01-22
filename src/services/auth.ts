@@ -1,12 +1,12 @@
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
 } from "firebase/auth";
 import {
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
+    doc,
+    getDoc,
+    serverTimestamp,
+    setDoc,
 } from "firebase/firestore";
 import { auth, db } from "../config/firebase";
 
@@ -35,6 +35,8 @@ export type AuthUser = {
 /* =======================
    REGISTER
 ======================= */
+
+
 
 export const registerUser = async (
   payload: RegisterPayload
@@ -92,45 +94,60 @@ export const registerUser = async (
    LOGIN
 ======================= */
 
-export const loginUser = async (
-  email: string,
-  password: string
-): Promise<AuthUser> => {
+export const loginUser = async (email: string, password: string) => {
+  if (!email || !password) {
+    throw new Error("Email and password are required");
+  }
+
   try {
-    // 1️⃣ Sign in
+    // Trim inputs to avoid invisible spaces
+    const emailTrimmed = email.trim();
+
+    // Sign in with Firebase Auth
     const credential = await signInWithEmailAndPassword(
       auth,
-      email,
+      emailTrimmed,
       password
     );
 
     const uid = credential.user.uid;
 
-    // 2️⃣ Fetch Firestore profile
-    const userRef = doc(db, "users", uid);
-    const snapshot = await getDoc(userRef);
+    // Fetch user profile from Firestore
+    const userDoc = await getDoc(doc(db, "users", uid));
+    const adminDoc = await getDoc(doc(db, "admins", uid));
 
-    if (!snapshot.exists()) {
-      throw new Error("User profile not found");
-    }
-
-    const data = snapshot.data();
+    // Determine role
+    const isAdmin = adminDoc.exists();
+    const profileData = userDoc.exists() ? userDoc.data() : {};
 
     return {
       uid,
-      email: data.email,
-      name: data.name,
-      surname: data.surname,
-      contactNumber: data.contactNumber,
-      address: data.address,
+      email: emailTrimmed,
+      role: isAdmin ? "admin" : "user",
+      profile: profileData,
     };
-  } catch (error: any) {
-    console.error("Firebase login error:", error);
-
-    if (error.code === "auth/invalid-credential") {
-      throw new Error("Invalid email or password");
+  } catch (err: any) {
+    console.error("Firebase login error:", err);
+    // Handle different Firebase Auth errors
+    switch (err.code) {
+      case "auth/user-not-found":
+        throw new Error("No account found with this email");
+      case "auth/wrong-password":
+        throw new Error("Incorrect password");
+      case "auth/invalid-email":
+        throw new Error("Invalid email format");
+      default:
+        throw new Error(err.message || "Login failed");
     }
-
-    throw new Error("Login failed");
   }
+};
+/* =======================
+   CHECK ADMIN
+======================= */
+export const isAdminUser = async (): Promise<boolean> => {
+  const user = auth.currentUser;
+  if (!user) return false;
+
+  const snap = await getDoc(doc(db, "admins", user.uid));
+  return snap.exists();
 };
