@@ -1,12 +1,16 @@
 import { useRouter } from 'expo-router';
-import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {auth} from '../src/config/firebase';
+import {ImageBackground, StyleSheet, Text, TouchableOpacity, View, Dimensions,} from 'react-native';
+
 
 const { width, height } = Dimensions.get('window');
 
 export default function LandingScreen() {
   const router = useRouter();
+  console.log("Firebase user:", auth.currentUser);
 
   return (
+    <>
     <ImageBackground 
       source={require('../assets/images/cassidy-mills-LPTUjv9l8BE-unsplash.jpg')}
       style={styles.backgroundImage}
@@ -60,7 +64,9 @@ export default function LandingScreen() {
           </View>
         </View>
       </View>
+      
     </ImageBackground>
+    </>
   );
 }
 

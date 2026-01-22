@@ -3,24 +3,18 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB9_TrGY11eND2FwRAXb7oV6fWrUxNSJDk",
-  authDomain: "royalry-8cfe2.firebaseapp.com",
-  projectId: "royalry-8cfe2",
-  storageBucket: "royalry-8cfe2.firebasestorage.app",
-  messagingSenderId: "882560462234",
-  appId: "1:882560462234:web:69898d6d62a019c874de23",
-  measurementId: "G-7Z4T5Q78Y6"
+  apiKey: "AIzaSyAKHFs-SHzlAoOvD8duZb1he0samAj8q0k",
+  authDomain: "rn-restuarant-app-64df9.firebaseapp.com",
+  projectId: "rn-restuarant-app-64df9",
+  storageBucket: "rn-restuarant-app-64df9.appspot.com", // ✅ FIXED
+  messagingSenderId: "262220698487",
+  appId: "1:262220698487:web:f347802208e00ec4c8c772",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Auth
+// Firebase services
 export const auth = getAuth(app);
-
-// For development, you can connect to emulator (optional)
-// if (__DEV__) {
-//   connectAuthEmulator(auth, 'http://localhost:9099');
-// }
-
 export const db = getFirestore(app);
+export default app;
