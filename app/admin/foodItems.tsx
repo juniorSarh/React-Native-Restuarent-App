@@ -2,20 +2,20 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import {
-    addFoodItem,
-    deleteFoodItem,
-    listenToFoodItems,
-    updateFoodItem,
+  addFoodItem,
+  deleteFoodItem,
+  listenToFoodItems,
+  updateFoodItem,
 } from "../../src/services/food";
 import { uploadImage } from "../../src/services/storage";
 
@@ -30,6 +30,7 @@ export default function FoodAdminScreen() {
   const [category, setCategory] = useState("");
   const [available, setAvailable] = useState(true);
   const [image, setImage] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     return listenToFoodItems(setFoods);
@@ -43,6 +44,16 @@ export default function FoodAdminScreen() {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      setImageUrl(""); // Clear URL when picking image
+    }
+  };
+
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url);
+      return url.match(/\.(jpeg|jpg|gif|png|webp)$/i) !== null;
+    } catch {
+      return false;
     }
   };
 
@@ -54,6 +65,7 @@ export default function FoodAdminScreen() {
     setCategory("");
     setAvailable(true);
     setImage(null);
+    setImageUrl("");
   };
 
   const saveFood = async () => {
@@ -61,11 +73,12 @@ export default function FoodAdminScreen() {
       return Alert.alert("Error", "Name and price are required");
     }
 
-    let imageUrl = editing?.imageUrl || "";
+    let finalImageUrl = editing?.imageUrl || "";
 
+    // Use uploaded image if available
     if (image && image !== editing?.imageUrl) {
       try {
-        imageUrl = await uploadImage(image, `foodItems/${Date.now()}.jpg`);
+        finalImageUrl = await uploadImage(image, `foodItems/${Date.now()}.jpg`);
       } catch (error: any) {
         console.error("Image upload failed:", error);
         
@@ -77,7 +90,16 @@ export default function FoodAdminScreen() {
         );
         
         // Continue without image
-        imageUrl = "";
+        finalImageUrl = "";
+      }
+    }
+    // Use URL input if no uploaded image
+    else if (imageUrl) {
+      if (isValidUrl(imageUrl)) {
+        finalImageUrl = imageUrl;
+      } else {
+        Alert.alert("Invalid URL", "Please enter a valid image URL (must end with .jpg, .jpeg, .png, .gif, or .webp)");
+        return;
       }
     }
 
@@ -87,7 +109,7 @@ export default function FoodAdminScreen() {
       price: Number(price),
       category,
       available,
-      imageUrl,
+      imageUrl: finalImageUrl,
     };
 
     console.log('Saving food item with payload:', payload);
@@ -116,12 +138,13 @@ export default function FoodAdminScreen() {
     setCategory(item.category);
     setAvailable(item.available !== false); // Default to true if undefined
     setImage(item.imageUrl);
+    setImageUrl(item.imageUrl || "");
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back("/screens/Dashboard")}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.push("/admin/dashboard")}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Food Management</Text>
@@ -175,7 +198,19 @@ export default function FoodAdminScreen() {
           <Text style={styles.imageText}>Pick Image</Text>
         </TouchableOpacity>
 
+        <TextInput
+          placeholder="Or paste image URL here"
+          placeholderTextColor="#999"
+          style={styles.input}
+          value={imageUrl}
+          onChangeText={(text) => {
+            setImageUrl(text);
+            setImage(null); // Clear picked image when typing URL
+          }}
+        />
+
         {image && <Image source={{ uri: image }} style={styles.preview} />}
+        {imageUrl && !image && <Image source={{ uri: imageUrl }} style={styles.preview} />}
 
         <TouchableOpacity style={styles.saveBtn} onPress={saveFood}>
           <Text style={styles.saveText}>
