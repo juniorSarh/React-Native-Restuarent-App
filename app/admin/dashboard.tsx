@@ -93,7 +93,7 @@ export default function AdminDashboard() {
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => router.push("/admin/foodItems")}>
             <Text style={styles.actionText}>Manage Menu</Text>
           </TouchableOpacity>
           

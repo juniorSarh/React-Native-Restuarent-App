@@ -1,17 +1,33 @@
-import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const { width } = Dimensions.get('window');
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import FoodItem from '../../src/components/FoodItem';
+import { listenToFoodItems } from '../../src/services/food';
 
 export default function MenuScreen() {
-  const menuItems = [
-    { id: 1, name: 'Margherita Pizza', price: '$12.99', category: 'Pizza', emoji: '🍕' },
-    { id: 2, name: 'Caesar Salad', price: '$8.99', category: 'Salads', emoji: '🥗' },
-    { id: 3, name: 'Pasta Carbonara', price: '$14.99', category: 'Pasta', emoji: '🍜' },
-    { id: 4, name: 'Grilled Salmon', price: '$18.99', category: 'Seafood', emoji: '🐟' },
-    { id: 5, name: 'Chocolate Cake', price: '$6.99', category: 'Desserts', emoji: '🍰' },
-    { id: 6, name: 'Cocktail Special', price: '$10.99', category: 'Drinks', emoji: '🍹' },
-  ];
+  const [foodItems, setFoodItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = listenToFoodItems((items) => {
+      setFoodItems(items);
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const handleAddToCart = (item: any) => {
+    // TODO: Implement cart functionality
+    console.log('Added to cart:', item.name);
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -21,23 +37,20 @@ export default function MenuScreen() {
       </View>
 
       <ScrollView style={styles.menuContainer} showsVerticalScrollIndicator={false}>
-        {menuItems.map((item) => (
-          <TouchableOpacity key={item.id} style={styles.menuItem}>
-            <View style={styles.itemEmoji}>
-              <Text style={styles.emojiText}>{item.emoji}</Text>
-            </View>
-            <View style={styles.itemInfo}>
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemCategory}>{item.category}</Text>
-            </View>
-            <View style={styles.itemPrice}>
-              <Text style={styles.priceText}>{item.price}</Text>
-            </View>
-            <TouchableOpacity style={styles.addButton}>
-              <Text style={styles.addButtonText}>+</Text>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
+        {foodItems.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No menu items available</Text>
+            <Text style={styles.emptySubtext}>Check back later for delicious options!</Text>
+          </View>
+        ) : (
+          foodItems.map((item) => (
+            <FoodItem 
+              key={item.id} 
+              item={item} 
+              onAddToCart={handleAddToCart}
+            />
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -46,6 +59,12 @@ export default function MenuScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#1a1a1a',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#1a1a1a',
   },
   header: {
@@ -68,61 +87,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
-  menuItem: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
-  },
-  itemEmoji: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#3a3a3a',
-    borderRadius: 25,
+  emptyContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    paddingVertical: 50,
   },
-  emojiText: {
-    fontSize: 24,
-  },
-  itemInfo: {
-    flex: 1,
-  },
-  itemName: {
-    fontSize: 16,
-    fontWeight: '600',
+  emptyText: {
+    fontSize: 18,
     color: '#FFFFFF',
-    marginBottom: 2,
+    marginBottom: 10,
   },
-  itemCategory: {
+  emptySubtext: {
     fontSize: 14,
     color: '#B0B0B0',
-  },
-  itemPrice: {
-    marginRight: 15,
-  },
-  priceText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  addButton: {
-    width: 30,
-    height: 30,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000000',
-    lineHeight: 18,
+    textAlign: 'center',
   },
 });
