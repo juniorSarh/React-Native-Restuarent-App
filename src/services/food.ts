@@ -1,15 +1,15 @@
 import {
-  collection,
   addDoc,
-  updateDoc,
+  collection,
   deleteDoc,
   doc,
   onSnapshot,
   serverTimestamp,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 
-const FOOD_COLLECTION = "foodItems";
+const FOOD_COLLECTION = "fooditems";
 
 export const listenToFoodItems = (
   callback: (items: any[]) => void
@@ -26,11 +26,19 @@ export const listenToFoodItems = (
 };
 
 export const addFoodItem = async (data: any) => {
-  await addDoc(collection(db, FOOD_COLLECTION), {
-    ...data,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
+  try {
+    console.log('Adding food item with data:', data);
+    const docRef = await addDoc(collection(db, FOOD_COLLECTION), {
+      ...data,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    console.log('Food item added with ID:', docRef.id);
+    return docRef;
+  } catch (error) {
+    console.error('Error adding food item:', error);
+    throw error;
+  }
 };
 
 export const updateFoodItem = async (id: string, data: any) => {

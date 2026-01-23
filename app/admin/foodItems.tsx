@@ -28,6 +28,7 @@ export default function FoodAdminScreen() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
+  const [available, setAvailable] = useState(true);
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,6 +52,7 @@ export default function FoodAdminScreen() {
     setDescription("");
     setPrice("");
     setCategory("");
+    setAvailable(true);
     setImage(null);
   };
 
@@ -84,18 +86,24 @@ export default function FoodAdminScreen() {
       description,
       price: Number(price),
       category,
+      available,
       imageUrl,
     };
+
+    console.log('Saving food item with payload:', payload);
 
     try {
       if (editing) {
         await updateFoodItem(editing.id, payload);
+        console.log('Food item updated successfully');
       } else {
         await addFoodItem(payload);
+        console.log('Food item added successfully');
       }
       resetForm();
       Alert.alert("Success", editing ? "Food item updated!" : "Food item added!");
     } catch (error: any) {
+      console.error('Save food item error:', error);
       Alert.alert("Error", "Failed to save food item: " + error.message);
     }
   };
@@ -106,13 +114,14 @@ export default function FoodAdminScreen() {
     setDescription(item.description);
     setPrice(item.price.toString());
     setCategory(item.category);
+    setAvailable(item.available !== false); // Default to true if undefined
     setImage(item.imageUrl);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back("/screens/Dashboard")}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Food Management</Text>
@@ -149,6 +158,18 @@ export default function FoodAdminScreen() {
           value={category}
           onChangeText={setCategory}
         />
+
+        <View style={styles.toggleContainer}>
+          <Text style={styles.toggleLabel}>Available:</Text>
+          <TouchableOpacity 
+            style={[styles.toggle, available ? styles.toggleOn : styles.toggleOff]}
+            onPress={() => setAvailable(!available)}
+          >
+            <Text style={styles.toggleText}>
+              {available ? "YES" : "NO"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity style={styles.imageBtn} onPress={pickImage}>
           <Text style={styles.imageText}>Pick Image</Text>
@@ -229,6 +250,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   saveText: { color: "#fff", fontWeight: "700" },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  toggleLabel: {
+    color: "#fff",
+    fontSize: 16,
+    marginRight: 10,
+  },
+  toggle: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  toggleOn: {
+    backgroundColor: "#00c853",
+  },
+  toggleOff: {
+    backgroundColor: "#666",
+  },
+  toggleText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 12,
+  },
   item: {
     flexDirection: "row",
     backgroundColor: "#1f1f1f",
