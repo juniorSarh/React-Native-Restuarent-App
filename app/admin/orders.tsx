@@ -2,6 +2,7 @@ import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from '../../src/config/firebase';
+import { router } from 'expo-router';
 
 type OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
 
@@ -164,6 +165,9 @@ export default function AdminOrders() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.push("/admin/dashboard")}>
+          <Text style={styles.backText}>← Back</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>Orders Management</Text>
         <Text style={styles.subtitle}>{orders.length} active orders</Text>
       </View>
@@ -202,6 +206,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 5,
+  },
+  backBtn: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+  },
+  backText: {
+    color: '#4fc3f7',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   subtitle: {
     fontSize: 14,

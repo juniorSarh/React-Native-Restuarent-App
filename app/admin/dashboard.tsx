@@ -97,7 +97,7 @@ export default function AdminDashboard() {
             <Text style={styles.actionText}>Manage Menu</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => router.push("/admin/orders")}>
             <Text style={styles.actionText}>View Orders</Text>
           </TouchableOpacity>
           

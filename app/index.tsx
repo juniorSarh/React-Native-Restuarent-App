@@ -48,7 +48,7 @@ export default function LandingScreen() {
 
             <TouchableOpacity 
               style={styles.tertiaryButton} 
-              onPress={() => router.push('/screens/home')}
+              onPress={() => router.push('/(tabs)/menu')}
             >
               <Text style={styles.tertiaryButtonText}>Browse Menu</Text>
             </TouchableOpacity>
