@@ -1,79 +1,7 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-export default function CartScreen() {
-  const cartItems = [
-    { id: 1, name: 'Margherita Pizza', price: '$12.99', quantity: 2, emoji: '🍕' },
-    { id: 2, name: 'Caesar Salad', price: '$8.99', quantity: 1, emoji: '🥗' },
-  ];
-
-  const subtotal = 12.99 * 2 + 8.99;
-  const tax = subtotal * 0.1;
-  const total = subtotal + tax;
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Cart</Text>
-        <Text style={styles.subtitle}>Review your order</Text>
-      </View>
-
-      <ScrollView style={styles.cartContainer} showsVerticalScrollIndicator={false}>
-        {cartItems.length === 0 ? (
-          <View style={styles.emptyCart}>
-            <Text style={styles.emptyEmoji}>🛒</Text>
-            <Text style={styles.emptyText}>Your cart is empty</Text>
-            <TouchableOpacity style={styles.browseButton}>
-              <Text style={styles.browseButtonText}>Browse Menu</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <>
-            {cartItems.map((item) => (
-              <View key={item.id} style={styles.cartItem}>
-                <View style={styles.itemEmoji}>
-                  <Text style={styles.emojiText}>{item.emoji}</Text>
-                </View>
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={styles.itemPrice}>{item.price}</Text>
-                </View>
-                <View style={styles.quantityControls}>
-                  <TouchableOpacity style={styles.quantityButton}>
-                    <Text style={styles.quantityButtonText}>-</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.quantityText}>{item.quantity}</Text>
-                  <TouchableOpacity style={styles.quantityButton}>
-                    <Text style={styles.quantityButtonText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-
-            <View style={styles.summarySection}>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Subtotal</Text>
-                <Text style={styles.summaryValue}>${subtotal.toFixed(2)}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Tax</Text>
-                <Text style={styles.summaryValue}>${tax.toFixed(2)}</Text>
-              </View>
-              <View style={[styles.summaryRow, styles.totalRow]}>
-                <Text style={styles.totalLabel}>Total</Text>
-                <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
-              </View>
-            </View>
-
-            <TouchableOpacity style={styles.checkoutButton}>
-              <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
-            </TouchableOpacity>
-          </>
-        )}
-      </ScrollView>
-    </View>
-  );
-}
+import { useState } from 'react';
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCart } from '../../src/context/CartContext';
+import { createOrder } from '../../src/services/orders';
 
 const styles = StyleSheet.create({
   container: {
@@ -81,159 +9,276 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a1a',
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 20,
     paddingTop: 60,
-    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
   },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 5,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#B0B0B0',
-    textAlign: 'center',
+  clearText: {
+    color: '#ff6b6b',
+    fontSize: 14,
   },
-  cartContainer: {
+  list: {
     flex: 1,
-    paddingHorizontal: 20,
-  },
-  emptyCart: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyEmoji: {
-    fontSize: 64,
-    marginBottom: 20,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: '#B0B0B0',
-    marginBottom: 20,
-  },
-  browseButton: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 25,
-  },
-  browseButtonText: {
-    color: '#000000',
-    fontSize: 16,
-    fontWeight: '600',
+    padding: 20,
   },
   cartItem: {
     backgroundColor: '#2a2a2a',
     borderRadius: 12,
     padding: 15,
     marginBottom: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#3a3a3a',
   },
-  itemEmoji: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#3a3a3a',
-    borderRadius: 25,
-    justifyContent: 'center',
+  itemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginRight: 15,
-  },
-  emojiText: {
-    fontSize: 24,
-  },
-  itemInfo: {
-    flex: 1,
+    marginBottom: 10,
   },
   itemName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 2,
+    fontWeight: 'bold',
+    color: '#fff',
+    flex: 1,
   },
   itemPrice: {
-    fontSize: 14,
-    color: '#B0B0B0',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4fc3f7',
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
   },
-  quantityButton: {
+  quantityBtn: {
     width: 30,
     height: 30,
-    backgroundColor: '#3a3a3a',
     borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    lineHeight: 18,
+    backgroundColor: '#444',
   },
   quantityText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginHorizontal: 15,
+    color: '#fff',
+    marginHorizontal: 10,
   },
-  summarySection: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
+  quantityBtnText: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
   },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  customizationSummary: {
     marginBottom: 10,
   },
-  summaryLabel: {
-    fontSize: 16,
-    color: '#B0B0B0',
+  customizationText: {
+    fontSize: 14,
+    color: '#fff',
   },
-  summaryValue: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '600',
+  removeBtn: {
+    backgroundColor: '#ff6b6b',
+    padding: 10,
+    borderRadius: 10,
   },
-  totalRow: {
-    borderTopWidth: 1,
-    borderTopColor: '#3a3a3a',
-    paddingTop: 10,
+  removeBtnText: {
+    fontSize: 14,
+    color: '#fff',
+    textAlign: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  emptySubtext: {
+    fontSize: 16,
+    color: '#fff',
     marginTop: 10,
   },
-  totalLabel: {
-    fontSize: 18,
-    color: '#FFFFFF',
-    fontWeight: '700',
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#333',
   },
-  totalValue: {
-    fontSize: 18,
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  checkoutButton: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 18,
-    borderRadius: 12,
+  totalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 10,
   },
-  checkoutButtonText: {
-    color: '#000000',
-    fontSize: 18,
-    fontWeight: '600',
-    letterSpacing: 1,
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  totalAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4fc3f7',
+  },
+  placeOrderBtn: {
+    backgroundColor: '#4fc3f7',
+    padding: 15,
+    borderRadius: 10,
+  },
+  disabledBtn: {
+    backgroundColor: '#666',
+  },
+  placeOrderText: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
   },
 });
+
+export default function CartScreen() {
+  const { items, total, clearCart, removeFromCart, updateQuantity, itemCount } = useCart();
+  const [placingOrder, setPlacingOrder] = useState(false);
+
+  const placeOrder = async () => {
+    if (items.length === 0) {
+      Alert.alert("Cart Empty", "Please add items to your cart first");
+      return;
+    }
+
+    setPlacingOrder(true);
+    try {
+      await createOrder(items, total);
+      clearCart();
+      Alert.alert("Success", "Order placed successfully!");
+    } catch (e: any) {
+      Alert.alert("Error", e.message);
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
+
+  const renderCartItem = ({ item }: { item: any }) => {
+    const { customization } = item;
+    
+    return (
+      <View style={styles.cartItem}>
+        <View style={styles.itemHeader}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          <Text style={styles.itemPrice}>R {item.totalPrice.toFixed(2)}</Text>
+        </View>
+        
+        <View style={styles.quantityControls}>
+          <TouchableOpacity 
+            style={styles.quantityBtn}
+            onPress={() => updateQuantity(item.id, item.quantity - 1)}
+          >
+            <Text style={styles.quantityBtnText}>-</Text>
+          </TouchableOpacity>
+          <Text style={styles.quantityText}>{item.quantity}</Text>
+          <TouchableOpacity 
+            style={styles.quantityBtn}
+            onPress={() => updateQuantity(item.id, item.quantity + 1)}
+          >
+            <Text style={styles.quantityBtnText}>+</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Customization Summary */}
+        <View style={styles.customizationSummary}>
+          {customization.selectedSides.length > 0 && (
+            <Text style={styles.customizationText}>
+              Sides: {customization.selectedSides.join(', ')}
+            </Text>
+          )}
+          {customization.selectedDrinks.length > 0 && (
+            <Text style={styles.customizationText}>
+              Drinks: {customization.selectedDrinks.join(', ')}
+            </Text>
+          )}
+          {customization.extras.length > 0 && (
+            <Text style={styles.customizationText}>
+              Extras: {customization.extras.map((e: any) => `${e.name} x${e.quantity}`).join(', ')}
+            </Text>
+          )}
+          {customization.removedIngredients.length > 0 && (
+            <Text style={styles.customizationText}>
+              No: {customization.removedIngredients.join(', ')}
+            </Text>
+          )}
+          {customization.addedIngredients.length > 0 && (
+            <Text style={styles.customizationText}>
+              Extra: {customization.addedIngredients.join(', ')}
+            </Text>
+          )}
+          {customization.specialInstructions && (
+            <Text style={styles.customizationText}>
+              Notes: {customization.specialInstructions}
+            </Text>
+          )}
+        </View>
+
+        <TouchableOpacity 
+          style={styles.removeBtn}
+          onPress={() => removeFromCart(item.id)}
+        >
+          <Text style={styles.removeBtnText}>Remove</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  if (items.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Your cart is empty</Text>
+        <Text style={styles.emptySubtext}>Add some delicious items to get started!</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Cart ({itemCount})</Text>
+        <TouchableOpacity onPress={clearCart}>
+          <Text style={styles.clearText}>Clear All</Text>
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        data={items}
+        keyExtractor={item => item.id}
+        renderItem={renderCartItem}
+        style={styles.list}
+        showsVerticalScrollIndicator={false}
+      />
+
+      <View style={styles.footer}>
+        <View style={styles.totalContainer}>
+          <Text style={styles.totalLabel}>Total:</Text>
+          <Text style={styles.totalAmount}>R {total.toFixed(2)}</Text>
+        </View>
+
+        <TouchableOpacity 
+          style={[styles.placeOrderBtn, placingOrder && styles.disabledBtn]}
+          onPress={placeOrder}
+          disabled={placingOrder}
+        >
+          <Text style={styles.placeOrderText}>
+            {placingOrder ? 'Placing Order...' : 'Place Order'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}

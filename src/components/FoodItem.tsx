@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import FoodCustomizationModal from './FoodCustomizationModal';
 
 interface FoodItemProps {
   item: {
@@ -13,39 +15,58 @@ interface FoodItemProps {
 }
 
 export default function FoodItem({ item, onAddToCart }: FoodItemProps) {
+  const [showCustomization, setShowCustomization] = useState(false);
+
+  const handleAddToCart = () => {
+    setShowCustomization(true);
+  };
+
   return (
-    <TouchableOpacity style={styles.menuItem}>
-      {item.imageUrl ? (
-        <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
-      ) : (
-        <View style={styles.itemEmoji}>
-          <Text style={styles.emojiText}>🍽️</Text>
+    <>
+      <TouchableOpacity style={styles.menuItem}>
+        {item.imageUrl ? (
+          <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+        ) : (
+          <View style={styles.itemEmoji}>
+            <Text style={styles.emojiText}>🍽️</Text>
+          </View>
+        )}
+        
+        <View style={styles.itemInfo}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          {item.description && (
+            <Text style={styles.itemDescription} numberOfLines={2}>
+              {item.description}
+            </Text>
+          )}
+          {item.category && (
+            <Text style={styles.itemCategory}>{item.category}</Text>
+          )}
         </View>
-      )}
-      
-      <View style={styles.itemInfo}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        {item.description && (
-          <Text style={styles.itemDescription} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
-        {item.category && (
-          <Text style={styles.itemCategory}>{item.category}</Text>
-        )}
-      </View>
-      
-      <View style={styles.itemPrice}>
-        <Text style={styles.priceText}>R {item.price.toFixed(2)}</Text>
-      </View>
-      
-      <TouchableOpacity 
-        style={styles.addButton} 
-        onPress={() => onAddToCart?.(item)}
-      >
-        <Text style={styles.addButtonText}>+</Text>
+        
+        <View style={styles.itemPrice}>
+          <Text style={styles.priceText}>R {item.price.toFixed(2)}</Text>
+        </View>
+        
+        <TouchableOpacity 
+          style={styles.addButton} 
+          onPress={handleAddToCart}
+        >
+          <Text style={styles.addButtonText}>+</Text>
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
+
+      <FoodCustomizationModal
+        visible={showCustomization}
+        onClose={() => setShowCustomization(false)}
+        foodItem={{
+          id: item.id,
+          name: item.name,
+          basePrice: item.price,
+          imageUrl: item.imageUrl,
+        }}
+      />
+    </>
   );
 }
 

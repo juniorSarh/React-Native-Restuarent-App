@@ -1,9 +1,12 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import CartBadge from '../../src/components/CartBadge';
 import FoodItem from '../../src/components/FoodItem';
 import { listenToFoodItems } from '../../src/services/food';
 
 export default function MenuScreen() {
+  const router = useRouter();
   const [foodItems, setFoodItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,6 +37,12 @@ export default function MenuScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Menu</Text>
         <Text style={styles.subtitle}>Discover our culinary delights</Text>
+        <TouchableOpacity 
+          style={styles.cartButton}
+          onPress={() => router.push('/(tabs)/cart')}
+        >
+          <CartBadge />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.menuContainer} showsVerticalScrollIndicator={false}>
@@ -70,6 +79,16 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     paddingTop: 60,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  cartButton: {
+    position: 'absolute',
+    top: 60,
+    right: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
