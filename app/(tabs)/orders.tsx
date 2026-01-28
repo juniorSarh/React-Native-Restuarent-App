@@ -167,7 +167,7 @@ export default function OrdersScreen() {
                     Order #{item.id.slice(-8)}
                   </Text>
                   <Text style={styles.itemPrice}>
-                    R {(cartItem?.totalPrice || 0).toFixed(2)}
+                    R {((cartItem?.basePrice || 0) * (cartItem?.quantity || 0)).toFixed(2)}
                   </Text>
                 </View>
                 {/* Customization Details */}
@@ -185,17 +185,7 @@ export default function OrdersScreen() {
                     )}
                     {cartItem.customization?.extras?.length > 0 && (
                       <Text style={styles.customText}>
-                        Extras: {cartItem.customization.extras.map((e: any) => e.name + ' x' + e.quantity).join(', ')}
-                      </Text>
-                    )}
-                    {cartItem.customization?.removedIngredients?.length > 0 && (
-                      <Text style={styles.customText}>
-                        No: {cartItem.customization.removedIngredients.join(', ')}
-                      </Text>
-                    )}
-                    {cartItem.customization?.addedIngredients?.length > 0 && (
-                      <Text style={styles.customText}>
-                        Extra: {cartItem.customization.addedIngredients.join(', ')}
+                        Extras: {cartItem.customization.extras.map((e: any) => e.id + ' x' + e.quantity).join(', ')}
                       </Text>
                     )}
                     {cartItem.customization?.specialInstructions && (

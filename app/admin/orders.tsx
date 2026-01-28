@@ -72,7 +72,7 @@ export default function AdminOrders() {
               <View key={index} style={styles.orderItem}>
                 <View style={styles.itemHeader}>
                   <Text style={styles.itemName}>{cartItem.name} x{cartItem.quantity}</Text>
-                  <Text style={styles.itemPrice}>R {cartItem.totalPrice.toFixed(2)}</Text>
+                  <Text style={styles.itemPrice}>R {((cartItem.basePrice || 0) * (cartItem.quantity || 0)).toFixed(2)}</Text>
                 </View>
                 
                 {/* Customization Details */}
@@ -90,17 +90,7 @@ export default function AdminOrders() {
                     )}
                     {cartItem.customization.extras?.length > 0 && (
                       <Text style={styles.customText}>
-                        Extras: {cartItem.customization.extras.map((e: any) => e.name + ' x' + e.quantity).join(', ')}
-                      </Text>
-                    )}
-                    {cartItem.customization.removedIngredients?.length > 0 && (
-                      <Text style={styles.customText}>
-                        No: {cartItem.customization.removedIngredients.join(', ')}
-                      </Text>
-                    )}
-                    {cartItem.customization.addedIngredients?.length > 0 && (
-                      <Text style={styles.customText}>
-                        Extra: {cartItem.customization.addedIngredients.join(', ')}
+                        Extras: {cartItem.customization.extras.map((e: any) => e.id + ' x' + e.quantity).join(', ')}
                       </Text>
                     )}
                     {cartItem.customization.specialInstructions && (
