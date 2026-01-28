@@ -3,12 +3,12 @@ import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { auth, db } from "../../src/config/firebase";
 
@@ -77,7 +77,7 @@ export default function ProfileScreen() {
       id: 2,
       title: "Order History",
       icon: "📦",
-      onPress: () => router.push("/(tabs)/cart"),
+      onPress: () => router.push("/(tabs)/orders"),
     },
     {
       id: 3,
@@ -106,7 +106,7 @@ export default function ProfileScreen() {
 
   if (!user) return null;
 
-  const initials = `${user.name[0]}${user.surname[0]}`;
+  const initials = (user.name[0] || '') + (user.surname[0] || '');
 
   return (
     <View style={styles.container}>

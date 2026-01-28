@@ -164,12 +164,11 @@ export default function OrdersScreen() {
               <View key={index} style={styles.orderItem}>
                 <View style={styles.itemHeader}>
                   <Text style={styles.orderId}>
-                        {`Order #${item.id.slice(-8)}`}
+                    Order #{item.id.slice(-8)}
                   </Text>
                   <Text style={styles.itemPrice}>
-                        {`R ${(cartItem?.totalPrice || 0).toFixed(2)}`}
+                    R {(cartItem?.totalPrice || 0).toFixed(2)}
                   </Text>
-
                 </View>
                 {/* Customization Details */}
                 {cartItem.customization && (
@@ -186,7 +185,7 @@ export default function OrdersScreen() {
                     )}
                     {cartItem.customization?.extras?.length > 0 && (
                       <Text style={styles.customText}>
-                        Extras: {cartItem.customization.extras.map((e: any) => `${e.name} x${e.quantity}`).join(', ')}
+                        Extras: {cartItem.customization.extras.map((e: any) => e.name + ' x' + e.quantity).join(', ')}
                       </Text>
                     )}
                     {cartItem.customization?.removedIngredients?.length > 0 && (
@@ -214,7 +213,7 @@ export default function OrdersScreen() {
           <View style={styles.totalSection}>
             <Text style={styles.totalLabel}>Total Amount:</Text>
             <Text style={styles.totalAmount}>
-              {`R ${item.totalAmount?.toFixed(2) || '0.00'}`}
+              R {item.totalAmount?.toFixed(2) || '0.00'}
             </Text>
           </View>
 

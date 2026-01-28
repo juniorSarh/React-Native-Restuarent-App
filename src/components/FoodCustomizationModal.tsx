@@ -1,39 +1,21 @@
 import { useState } from 'react';
 import {
-    Alert,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useCart } from '../context/CartContext';
+import { CartItem, useCart } from '../context/CartContext';
 
 // Sample data - in real app, this would come from the food item
-const sampleSideOptions = [
-  { id: 'pap', name: 'Pap', price: 0, included: true },
-  { id: 'chips', name: 'Chips', price: 0, included: true },
-  { id: 'salad', name: 'Salad', price: 0, included: true },
-  { id: 'rice', name: 'Rice', price: 15, included: false },
-];
-
 const sampleDrinkOptions = [
   { id: 'coke', name: 'Coke', price: 25, included: false },
   { id: 'fanta', name: 'Fanta', price: 25, included: false },
   { id: 'water', name: 'Water', price: 15, included: false },
-];
-
-const sampleExtras = [
-  { id: 'extra-chips', name: 'Extra Chips', price: 20 },
-  { id: 'extra-salad', name: 'Extra Salad', price: 25 },
-  { id: 'sauce', name: 'Extra Sauce', price: 10 },
-  { id: 'cheese', name: 'Extra Cheese', price: 15 },
-];
-
-const sampleIngredients = [
-  'Lettuce', 'Tomato', 'Onion', 'Pickles', 'Cheese', 'Bacon', 'Mushrooms'
 ];
 
 interface FoodCustomizationModalProps {
@@ -45,32 +27,35 @@ interface FoodCustomizationModalProps {
     basePrice: number;
     imageUrl?: string;
   };
+  initialData?: CartItem;
+  onSave?: (updatedItem: Omit<CartItem, 'cartItemId'>) => void;
+}
+
+interface Customization {
+  selectedSides: string[];
+  selectedDrinks: string[];
+  extras: { id: string; quantity: number }[];
+  specialInstructions: string;
 }
 
 export default function FoodCustomizationModal({ 
   visible, 
   onClose, 
-  foodItem 
+  foodItem,
+  initialData,
+  onSave
 }: FoodCustomizationModalProps) {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedSides, setSelectedSides] = useState<string[]>([]);
   const [selectedDrinks, setSelectedDrinks] = useState<string[]>([]);
   const [extras, setExtras] = useState<{ [key: string]: number }>({});
-  const [removedIngredients, setRemovedIngredients] = useState<string[]>([]);
-  const [addedIngredients, setAddedIngredients] = useState<string[]>([]);
   const [specialInstructions, setSpecialInstructions] = useState('');
 
   // Calculate total price
   const calculateTotal = () => {
     let total = foodItem.basePrice;
-    
-    // Add extras
-    Object.entries(extras).forEach(([extraId, qty]) => {
-      const extra = sampleExtras.find(e => e.id === extraId);
-      if (extra) total += extra.price * qty;
-    });
-    
+       
     // Add drinks (if not included)
     selectedDrinks.forEach(drinkId => {
       const drink = sampleDrinkOptions.find(d => d.id === drinkId);
@@ -108,63 +93,50 @@ export default function FoodCustomizationModal({
     });
   };
 
-  const toggleIngredient = (ingredient: string, type: 'remove' | 'add') => {
-    if (type === 'remove') {
-      setRemovedIngredients(prev => 
-        prev.includes(ingredient) 
-          ? prev.filter(i => i !== ingredient)
-          : [...prev, ingredient]
-      );
-    } else {
-      setAddedIngredients(prev => 
-        prev.includes(ingredient) 
-          ? prev.filter(i => i !== ingredient)
-          : [...prev, ingredient]
-      );
-    }
-  };
-
   const handleAddToCart = () => {
-    if (quantity <= 0) {
-      Alert.alert('Error', 'Please select at least 1 item');
-      return;
-    }
+  if (quantity <= 0) {
+    Alert.alert('Error', 'Please select at least 1 item');
+    return;
+  }
 
-    const customization = {
-      selectedSides,
-      selectedDrinks,
-      extras: Object.entries(extras).map(([id, qty]) => ({
-        id,
-        name: sampleExtras.find(e => e.id === id)?.name || '',
-        price: sampleExtras.find(e => e.id === id)?.price || 0,
-        quantity: qty,
-      })),
-      removedIngredients,
-      addedIngredients,
-      specialInstructions,
-    };
-
-    addToCart({
-      foodId: foodItem.id,
-      name: foodItem.name,
-      basePrice: foodItem.basePrice,
-      quantity,
-      imageUrl: foodItem.imageUrl,
-      customization,
-    });
-
-    // Reset form
-    setQuantity(1);
-    setSelectedSides([]);
-    setSelectedDrinks([]);
-    setExtras({});
-    setRemovedIngredients([]);
-    setAddedIngredients([]);
-    setSpecialInstructions('');
-    
-    onClose();
-    Alert.alert('Success', 'Item added to cart!');
+  const customization: Customization = {
+    selectedSides,
+    selectedDrinks,
+    extras: Object.entries(extras).map(([id, qty]) => ({
+      id,
+      quantity: qty,
+    })),
+    specialInstructions,
   };
+
+  const itemData = {
+    foodId: foodItem.id,
+    name: foodItem.name,
+    basePrice: foodItem.basePrice,
+    quantity,
+    imageUrl: foodItem.imageUrl,
+    customization,
+  };
+
+  if (onSave && initialData) {
+    // Editing existing item
+    onSave(itemData);
+  } else {
+    // Adding new item
+    addToCart(itemData);
+  }
+
+  // Reset form
+  setQuantity(1);
+  setSelectedSides([]);
+  setSelectedDrinks([]);
+  setExtras({});
+  setSpecialInstructions('');
+
+  onClose();
+  Alert.alert('Success', initialData ? 'Item updated!' : 'Item added to cart!');
+};
+
 
   return (
     <Modal
@@ -204,26 +176,6 @@ export default function FoodCustomizationModal({
             </View>
           </View>
 
-          {/* Side Options */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Side Options (Select up to 2)</Text>
-            {sampleSideOptions.map(side => (
-              <TouchableOpacity
-                key={side.id}
-                style={[
-                  styles.option,
-                  selectedSides.includes(side.id) && styles.selectedOption
-                ]}
-                onPress={() => toggleSide(side.id)}
-              >
-                <Text style={styles.optionText}>
-                  {side.name} {side.included ? '(Included)' : `(+R${side.price})`}
-                </Text>
-                <View style={[styles.checkbox, selectedSides.includes(side.id) && styles.checked]} />
-              </TouchableOpacity>
-            ))}
-          </View>
-
           {/* Drink Options */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Drink Options</Text>
@@ -240,65 +192,6 @@ export default function FoodCustomizationModal({
                   {drink.name} {drink.included ? '(Included)' : `(+R${drink.price})`}
                 </Text>
                 <View style={[styles.checkbox, selectedDrinks.includes(drink.id) && styles.checked]} />
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Extras */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Extras</Text>
-            {sampleExtras.map(extra => (
-              <View key={extra.id} style={styles.extraContainer}>
-                <Text style={styles.extraName}>{extra.name} (+R{extra.price})</Text>
-                <View style={styles.extraControls}>
-                  <TouchableOpacity
-                    style={styles.extraBtn}
-                    onPress={() => updateExtraQuantity(extra.id, -1)}
-                  >
-                    <Text style={styles.extraBtnText}>-</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.extraQuantity}>{extras[extra.id] || 0}</Text>
-                  <TouchableOpacity
-                    style={styles.extraBtn}
-                    onPress={() => updateExtraQuantity(extra.id, 1)}
-                  >
-                    <Text style={styles.extraBtnText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </View>
-
-          {/* Ingredients */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
-            <Text style={styles.subsectionTitle}>Remove:</Text>
-            {sampleIngredients.map(ingredient => (
-              <TouchableOpacity
-                key={ingredient}
-                style={[
-                  styles.option,
-                  removedIngredients.includes(ingredient) && styles.selectedOption
-                ]}
-                onPress={() => toggleIngredient(ingredient, 'remove')}
-              >
-                <Text style={styles.optionText}>No {ingredient}</Text>
-                <View style={[styles.checkbox, removedIngredients.includes(ingredient) && styles.checked]} />
-              </TouchableOpacity>
-            ))}
-            
-            <Text style={styles.subsectionTitle}>Add:</Text>
-            {sampleIngredients.map(ingredient => (
-              <TouchableOpacity
-                key={ingredient}
-                style={[
-                  styles.option,
-                  addedIngredients.includes(ingredient) && styles.selectedOption
-                ]}
-                onPress={() => toggleIngredient(ingredient, 'add')}
-              >
-                <Text style={styles.optionText}>Extra {ingredient}</Text>
-                <View style={[styles.checkbox, addedIngredients.includes(ingredient) && styles.checked]} />
               </TouchableOpacity>
             ))}
           </View>

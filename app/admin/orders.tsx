@@ -1,8 +1,8 @@
+import { router } from 'expo-router';
 import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from '../../src/config/firebase';
-import { router } from 'expo-router';
 
 type OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
 
@@ -90,7 +90,7 @@ export default function AdminOrders() {
                     )}
                     {cartItem.customization.extras?.length > 0 && (
                       <Text style={styles.customText}>
-                        Extras: {cartItem.customization.extras.map((e: any) => `${e.name} x${e.quantity}`).join(', ')}
+                        Extras: {cartItem.customization.extras.map((e: any) => e.name + ' x' + e.quantity).join(', ')}
                       </Text>
                     )}
                     {cartItem.customization.removedIngredients?.length > 0 && (

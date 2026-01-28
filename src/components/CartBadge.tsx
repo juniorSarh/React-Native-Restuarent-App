@@ -2,7 +2,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useCart } from '../context/CartContext';
 
 export default function CartBadge() {
-  const { itemCount } = useCart();
+  const { items } = useCart();
+
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   if (itemCount === 0) return null;
 
