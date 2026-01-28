@@ -19,7 +19,7 @@ export default function LandingScreen() {
       <View style={styles.overlay}>
         <View style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.brandName}>Restaurant</Text>
+            <Text style={styles.brandName}>Royalty</Text>
             <Text style={styles.brandTagline}>Premium Dining Experience</Text>
           </View>
 

@@ -67,7 +67,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let total = basePrice;
     
     // Add extras (excluding included items)
-    customization.extras.forEach(extra => {
+    customization?.extras?.forEach(extra => {
       total += extra.price * extra.quantity;
     });
     

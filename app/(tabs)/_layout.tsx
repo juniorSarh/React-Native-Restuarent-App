@@ -65,6 +65,20 @@ export default function TabLayout() {
       />
       
       <Tabs.Screen
+        name="orders"
+        options={{
+          title: 'Orders',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons 
+              name={focused ? 'receipt' : 'receipt-outline'} 
+              size={size} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
