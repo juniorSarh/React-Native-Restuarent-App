@@ -63,6 +63,10 @@ export default function AdminOrders() {
         <View style={styles.orderContent}>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Customer</Text>
+            <Text style={styles.customerText}>Name: {item.customerInfo?.name || 'Unknown'}</Text>
+            <Text style={styles.customerText}>Email: {item.customerInfo?.email || 'Not provided'}</Text>
+            <Text style={styles.customerText}>Contact: {item.customerInfo?.contactNumber || 'Not provided'}</Text>
+            <Text style={styles.customerText}>Address: {item.customerInfo?.address || 'Not provided'}</Text>
             <Text style={styles.customerText}>User ID: {item.userId?.slice(-8) || 'Unknown'}</Text>
           </View>
 
