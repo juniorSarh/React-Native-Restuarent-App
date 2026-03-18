@@ -10,7 +10,7 @@ This project is a **React Native Restaurant App** that allows users to view food
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/react-native-restaurant-app.git
+git clone https://github.com/juniorSarh/React-Native-Restuarent-App
 cd react-native-restaurant-app
 ```
 ## Install dependances
