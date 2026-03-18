@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "React-Native-Restuarent-App",
-    "slug": "React-Native-Restuarent-App",
+    "name": "DineHub",
+    "slug": "DineHub",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "reactnativerestuarentapp",
+    "icon": "./assets/images/DineHub-Logo.png",
+    "scheme": "dinehub",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -16,14 +16,15 @@
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "monochromeImage": "./assets/images/splash-icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.sabelohgumede.DineHub"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/DineHub-Logo.png"
     },
     "plugins": [
       "expo-router",
@@ -43,6 +44,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9419db5d-a7a5-4539-809d-18b4f8997199"
+      }
     }
   }
 }

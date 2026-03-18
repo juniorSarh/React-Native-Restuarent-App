@@ -104,6 +104,13 @@ export default function AdminDashboard() {
           <TouchableOpacity style={styles.actionButton}>
             <Text style={styles.actionText}>Manage Users</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+      style={styles.actionButton}
+      onPress={() => router.push("/admin/addAdmin")}
+    >
+      <Text style={styles.actionText}>Add Admin</Text>
+    </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
