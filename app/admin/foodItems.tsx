@@ -5,6 +5,7 @@ import {
   Alert,
   FlatList,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TextInput,
@@ -21,8 +22,10 @@ import { uploadImage } from "../../src/services/storage";
 
 export default function FoodAdminScreen() {
   const router = useRouter();
+
   const [foods, setFoods] = useState<any[]>([]);
   const [editing, setEditing] = useState<any>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -36,25 +39,10 @@ export default function FoodAdminScreen() {
     return listenToFoodItems(setFoods);
   }, []);
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      setImageUrl(""); // Clear URL when picking image
-    }
-  };
-
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return url.match(/\.(jpeg|jpg|gif|png|webp)$/i) !== null;
-    } catch {
-      return false;
-    }
+  const openModal = () => setModalVisible(true);
+  const closeModal = () => {
+    setModalVisible(false);
+    resetForm();
   };
 
   const resetForm = () => {
@@ -68,39 +56,33 @@ export default function FoodAdminScreen() {
     setImageUrl("");
   };
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      setImageUrl("");
+    }
+  };
+
   const saveFood = async () => {
     if (!name || !price) {
-      return Alert.alert("Error", "Name and price are required");
+      return Alert.alert("Error", "Name and price required");
     }
 
     let finalImageUrl = editing?.imageUrl || "";
 
-    // Use uploaded image if available
     if (image && image !== editing?.imageUrl) {
       try {
-        finalImageUrl = await uploadImage(image, `foodItems/${Date.now()}.jpg`);
-      } catch (error: any) {
-        console.error("Image upload failed:", error);
-        
-        // Show a more user-friendly error message
-        Alert.alert(
-          "Image Upload Failed", 
-          "Could not upload the image. This is a web development issue with CORS. The item will be saved without an image.\n\nOn mobile devices, image upload will work perfectly.",
-          [{ text: "Continue without image", style: "default" }]
-        );
-        
-        // Continue without image
-        finalImageUrl = "";
+        finalImageUrl = await uploadImage(image, `food/${Date.now()}.jpg`);
+      } catch {
+        Alert.alert("Image upload failed, saving without image");
       }
-    }
-    // Use URL input if no uploaded image
-    else if (imageUrl) {
-      if (isValidUrl(imageUrl)) {
-        finalImageUrl = imageUrl;
-      } else {
-        Alert.alert("Invalid URL", "Please enter a valid image URL (must end with .jpg, .jpeg, .png, .gif, or .webp)");
-        return;
-      }
+    } else if (imageUrl) {
+      finalImageUrl = imageUrl;
     }
 
     const payload = {
@@ -112,21 +94,17 @@ export default function FoodAdminScreen() {
       imageUrl: finalImageUrl,
     };
 
-    console.log('Saving food item with payload:', payload);
-
     try {
       if (editing) {
         await updateFoodItem(editing.id, payload);
-        console.log('Food item updated successfully');
       } else {
         await addFoodItem(payload);
-        console.log('Food item added successfully');
       }
-      resetForm();
-      Alert.alert("Success", editing ? "Food item updated!" : "Food item added!");
+
+      closeModal();
+      Alert.alert("Success", "Saved successfully 🎉");
     } catch (error: any) {
-      console.error('Save food item error:', error);
-      Alert.alert("Error", "Failed to save food item: " + error.message);
+      Alert.alert("Error", error.message);
     }
   };
 
@@ -136,194 +114,190 @@ export default function FoodAdminScreen() {
     setDescription(item.description);
     setPrice(item.price.toString());
     setCategory(item.category);
-    setAvailable(item.available !== false); // Default to true if undefined
+    setAvailable(item.available);
     setImage(item.imageUrl);
     setImageUrl(item.imageUrl || "");
+    openModal();
   };
 
   return (
     <View style={styles.container}>
+      {/* 🔝 Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.push("/admin/dashboard")}>
-          <Text style={styles.backText}>← Back</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.back}>⬅ Back</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Food Management</Text>
+
+        <Text style={styles.title}>Food Manager</Text>
       </View>
 
-      {/* FORM */}
-      <View style={styles.form}>
-        <TextInput
-          placeholder="Name"
-          placeholderTextColor="#999"
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-        />
-        <TextInput
-          placeholder="Description"
-          placeholderTextColor="#999"
-          style={styles.input}
-          value={description}
-          onChangeText={setDescription}
-        />
-        <TextInput
-          placeholder="Price"
-          placeholderTextColor="#999"
-          style={styles.input}
-          value={price}
-          keyboardType="numeric"
-          onChangeText={setPrice}
-        />
-        <TextInput
-          placeholder="Category"
-          placeholderTextColor="#999"
-          style={styles.input}
-          value={category}
-          onChangeText={setCategory}
-        />
+      {/* ➕ Add Button */}
+      <TouchableOpacity style={styles.addBtn} onPress={openModal}>
+        <Text style={styles.addText}>＋</Text>
+      </TouchableOpacity>
 
-        <View style={styles.toggleContainer}>
-          <Text style={styles.toggleLabel}>Available:</Text>
-          <TouchableOpacity 
-            style={[styles.toggle, available ? styles.toggleOn : styles.toggleOff]}
-            onPress={() => setAvailable(!available)}
-          >
-            <Text style={styles.toggleText}>
-              {available ? "YES" : "NO"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.imageBtn} onPress={pickImage}>
-          <Text style={styles.imageText}>Pick Image</Text>
-        </TouchableOpacity>
-
-        <TextInput
-          placeholder="Or paste image URL here"
-          placeholderTextColor="#999"
-          style={styles.input}
-          value={imageUrl}
-          onChangeText={(text) => {
-            setImageUrl(text);
-            setImage(null); // Clear picked image when typing URL
-          }}
-        />
-
-        {image && <Image source={{ uri: image }} style={styles.preview} />}
-        {imageUrl && !image && <Image source={{ uri: imageUrl }} style={styles.preview} />}
-
-        <TouchableOpacity style={styles.saveBtn} onPress={saveFood}>
-          <Text style={styles.saveText}>
-            {editing ? "Update Food" : "Add Food"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* LIST */}
+      {/* 📋 List */}
       <FlatList
         data={foods}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({ item }) => (
-          <View style={styles.item}>
+          <View style={styles.card}>
             {item.imageUrl && (
-              <Image source={{ uri: item.imageUrl }} style={styles.itemImg} />
+              <Image source={{ uri: item.imageUrl }} style={styles.img} />
             )}
+
             <View style={{ flex: 1 }}>
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemPrice}>R {item.price}</Text>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.price}>R {item.price}</Text>
             </View>
+
             <TouchableOpacity onPress={() => editFood(item)}>
               <Text style={styles.edit}>Edit</Text>
             </TouchableOpacity>
+
             <TouchableOpacity onPress={() => deleteFoodItem(item.id)}>
               <Text style={styles.delete}>Delete</Text>
             </TouchableOpacity>
           </View>
         )}
       />
+
+      {/* 🧾 MODAL FORM */}
+      <Modal visible={modalVisible} animationType="slide">
+        <View style={styles.modal}>
+          <Text style={styles.modalTitle}>
+            {editing ? "Edit Food" : "Add Food"}
+          </Text>
+
+          <TextInput placeholder="Name" style={styles.input} value={name} onChangeText={setName} />
+          <TextInput placeholder="Description" style={styles.input} value={description} onChangeText={setDescription} />
+          <TextInput placeholder="Price" style={styles.input} value={price} onChangeText={setPrice} keyboardType="numeric" />
+          <TextInput placeholder="Category" style={styles.input} value={category} onChangeText={setCategory} />
+
+          <TouchableOpacity style={styles.imageBtn} onPress={pickImage}>
+            <Text style={{ color: "#fff" }}>Pick Image</Text>
+          </TouchableOpacity>
+
+          <TextInput
+            placeholder="Or Image URL"
+            style={styles.input}
+            value={imageUrl}
+            onChangeText={(t) => {
+              setImageUrl(t);
+              setImage(null);
+            }}
+          />
+
+          {(image || imageUrl) && (
+            <Image source={{ uri: image || imageUrl }} style={styles.preview} />
+          )}
+
+          <TouchableOpacity style={styles.saveBtn} onPress={saveFood}>
+            <Text style={{ color: "#fff" }}>
+              {editing ? "Update" : "Save"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={closeModal}>
+            <Text style={styles.cancel}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212", padding: 20 },
+  container: { flex: 1, backgroundColor: "#0f172a", padding: 20 },
+
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
-  backBtn: {
-    marginRight: 15,
+
+  back: { color: "#38bdf8", marginRight: 10 },
+
+  title: { color: "#fff", fontSize: 24, fontWeight: "700" },
+
+  addBtn: {
+    position: "absolute",
+    bottom: 30,
+    right: 20,
+    backgroundColor: "#22c55e",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
-  backText: {
-    color: "#4fc3f7",
-    fontSize: 16,
-    fontWeight: '600',
+
+  addText: { color: "#fff", fontSize: 30 },
+
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#1e293b",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 10,
+    alignItems: "center",
   },
-  title: { color: "#fff", fontSize: 28, fontWeight: "700" },
-  form: { marginBottom: 30 },
-  input: {
-    backgroundColor: "#1f1f1f",
-    padding: 15,
-    borderRadius: 10,
+
+  img: { width: 60, height: 60, borderRadius: 10, marginRight: 10 },
+
+  name: { color: "#fff", fontWeight: "700" },
+
+  price: { color: "#9ca3af" },
+
+  edit: { color: "#38bdf8", marginRight: 10 },
+
+  delete: { color: "#ef4444" },
+
+  modal: {
+    flex: 1,
+    backgroundColor: "#0f172a",
+    padding: 20,
+    paddingTop: 60,
+  },
+
+  modalTitle: {
     color: "#fff",
+    fontSize: 22,
+    marginBottom: 20,
+    fontWeight: "700",
+  },
+
+  input: {
+    backgroundColor: "#1e293b",
+    color: "#fff",
+    padding: 14,
+    borderRadius: 10,
     marginBottom: 10,
   },
+
   imageBtn: {
-    backgroundColor: "#444",
+    backgroundColor: "#334155",
     padding: 12,
     borderRadius: 10,
     alignItems: "center",
     marginBottom: 10,
   },
-  imageText: { color: "#fff" },
-  preview: { width: 100, height: 100, borderRadius: 10, marginBottom: 10 },
+
+  preview: { width: 100, height: 100, borderRadius: 10 },
+
   saveBtn: {
-    backgroundColor: "#00c853",
+    backgroundColor: "#22c55e",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
+    marginTop: 10,
   },
-  saveText: { color: "#fff", fontWeight: "700" },
-  toggleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
+
+  cancel: {
+    color: "#ef4444",
+    textAlign: "center",
+    marginTop: 15,
   },
-  toggleLabel: {
-    color: "#fff",
-    fontSize: 16,
-    marginRight: 10,
-  },
-  toggle: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    minWidth: 60,
-    alignItems: 'center',
-  },
-  toggleOn: {
-    backgroundColor: "#00c853",
-  },
-  toggleOff: {
-    backgroundColor: "#666",
-  },
-  toggleText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 12,
-  },
-  item: {
-    flexDirection: "row",
-    backgroundColor: "#1f1f1f",
-    padding: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  itemImg: { width: 60, height: 60, borderRadius: 8, marginRight: 10 },
-  itemName: { color: "#fff", fontWeight: "700" },
-  itemPrice: { color: "#aaa" },
-  edit: { color: "#4fc3f7", marginRight: 10 },
-  delete: { color: "#ef5350" },
 });

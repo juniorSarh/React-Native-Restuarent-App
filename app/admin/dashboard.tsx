@@ -1,7 +1,14 @@
 import { useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { db } from "../../src/config/firebase";
 import { checkIsAdmin } from "../../src/services/admin";
 
@@ -26,20 +33,19 @@ export default function AdminDashboard() {
         const isAdmin = await checkIsAdmin();
         if (!isAdmin) return;
 
-        // Get orders
         const ordersSnap = await getDocs(collection(db, "orders"));
         let revenue = 0;
-        ordersSnap.forEach(doc => {
+
+        ordersSnap.forEach((doc) => {
           revenue += doc.data().totalAmount || 0;
         });
 
-        // Get users
         const usersSnap = await getDocs(collection(db, "users"));
 
-        setStats({ 
-          orders: ordersSnap.size, 
+        setStats({
+          orders: ordersSnap.size,
           revenue,
-          users: usersSnap.size
+          users: usersSnap.size,
         });
       } catch (error) {
         console.error("Error loading admin stats:", error);
@@ -58,59 +64,85 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color="#22c55e" />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      {/* 🔝 Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Admin Dashboard</Text>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
+        <View>
+          <Text style={styles.welcome}>Welcome Admin 👋</Text>
+          <Text style={styles.title}>Dashboard</Text>
+        </View>
+
+        <View style={styles.headerActions}>
+          {/* 👤 Profile */}
+          <TouchableOpacity
+            onPress={() => router.push("/admin/adminProfile")}
+            style={styles.profileBtn}
+          >
+            <Text style={styles.profileText}>👤</Text>
+          </TouchableOpacity>
+
+          {/* 🚪 Logout */}
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* 📊 Stats */}
         <View style={styles.statsGrid}>
           <View style={styles.card}>
-            <Text style={styles.label}>Total Orders</Text>
-            <Text style={styles.value}>{stats.orders}</Text>
+            <Text style={styles.cardLabel}>Orders</Text>
+            <Text style={styles.cardValue}>{stats.orders}</Text>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.label}>Revenue</Text>
-            <Text style={styles.value}>R {stats.revenue.toFixed(2)}</Text>
+            <Text style={styles.cardLabel}>Revenue</Text>
+            <Text style={styles.cardValue}>
+              R {stats.revenue.toFixed(2)}
+            </Text>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.label}>Total Users</Text>
-            <Text style={styles.value}>{stats.users}</Text>
+            <Text style={styles.cardLabel}>Users</Text>
+            <Text style={styles.cardValue}>{stats.users}</Text>
           </View>
         </View>
 
+        {/* ⚡ Actions */}
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
-          
-          <TouchableOpacity style={styles.actionButton} onPress={() => router.push("/admin/foodItems")}>
-            <Text style={styles.actionText}>Manage Menu</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.actionButton} onPress={() => router.push("/admin/orders")}>
-            <Text style={styles.actionText}>View Orders</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionText}>Manage Users</Text>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push("/admin/foodItems")}
+          >
+            <Text style={styles.actionText}>🍔 Manage Menu</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-      style={styles.actionButton}
-      onPress={() => router.push("/admin/addAdmin")}
-    >
-      <Text style={styles.actionText}>Add Admin</Text>
-    </TouchableOpacity>
+            style={styles.actionButton}
+            onPress={() => router.push("/admin/orders")}
+          >
+            <Text style={styles.actionText}>📦 View Orders</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.actionButton}>
+            <Text style={styles.actionText}>👥 Manage Users</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push("/admin/addAdmin")}
+          >
+            <Text style={styles.actionText}>➕ Add Admin</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -118,84 +150,118 @@ export default function AdminDashboard() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "#121212", 
+  container: {
+    flex: 1,
+    backgroundColor: "#0f172a",
   },
+
   loader: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: "#121212",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#0f172a",
   },
+
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 20,
     paddingTop: 60,
-    backgroundColor: '#1a1a1a',
   },
-  title: { 
-    color: "#fff", 
-    fontSize: 26, 
-    fontWeight: "700" 
+
+  welcome: {
+    color: "#9ca3af",
+    fontSize: 14,
   },
+
+  title: {
+    color: "#fff",
+    fontSize: 26,
+    fontWeight: "700",
+  },
+
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  profileBtn: {
+    backgroundColor: "#1e293b",
+    padding: 10,
+    borderRadius: 10,
+  },
+
+  profileText: {
+    fontSize: 18,
+  },
+
   logoutButton: {
-    backgroundColor: '#ff4444',
-    paddingHorizontal: 16,
+    backgroundColor: "#ef4444",
+    paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
   },
+
   logoutText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
   },
+
   content: {
-    flex: 1,
     padding: 20,
   },
+
   statsGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 30,
   },
+
   card: {
-    backgroundColor: "#1f1f1f",
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 15,
-    borderLeftWidth: 4,
-    borderLeftColor: '#007AFF',
+    backgroundColor: "#1e293b",
+    flex: 1,
+    marginHorizontal: 5,
+    padding: 16,
+    borderRadius: 14,
+    alignItems: "center",
   },
-  label: { 
-    color: "#aaa",
-    fontSize: 14,
-    marginBottom: 8,
+
+  cardLabel: {
+    color: "#9ca3af",
+    marginBottom: 6,
   },
-  value: { 
-    color: "#fff", 
-    fontSize: 24, 
-    fontWeight: "700" 
-  },
-  actionsSection: {
-    marginTop: 20,
-  },
-  sectionTitle: {
-    color: '#fff',
+
+  cardValue: {
+    color: "#fff",
     fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 20,
+    fontWeight: "700",
   },
+
+  actionsSection: {
+    marginTop: 10,
+  },
+
+  sectionTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 15,
+  },
+
   actionButton: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: "#1e293b",
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#3a3a3a',
+    borderColor: "#334155",
   },
+
   actionText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

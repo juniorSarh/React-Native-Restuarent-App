@@ -6,26 +6,57 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { registerAdmin } from "../../src/services/auth";
 import { useRouter } from "expo-router";
 
 export default function AddAdmin() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [secure, setSecure] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
+  // ✅ Simple validation
+  const validate = () => {
     if (!email || !password) {
-      return Alert.alert("Error", "Please fill in all fields");
+      Alert.alert("Error", "Please fill in all fields");
+      return false;
     }
 
+    if (!email.includes("@")) {
+      Alert.alert("Error", "Enter a valid email");
+      return false;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+
     try {
+      setLoading(true);
+
       await registerAdmin({ email, password });
-      Alert.alert("Success", "Admin created successfully");
-      router.back();
+
+      Alert.alert("Success", "Admin created successfully 🎉", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/admin/dashboard"),
+        },
+      ]);
     } catch (err) {
       Alert.alert("Error", "Failed to create admin");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,22 +83,40 @@ export default function AddAdmin() {
         value={email}
         onChangeText={setEmail}
         style={styles.input}
+        autoCapitalize="none"
+        keyboardType="email-address"
       />
 
       {/* 🔑 Password */}
       <Text style={styles.label}>Password</Text>
-      <TextInput
-        placeholder="Enter password"
-        placeholderTextColor="#9ca3af"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.input}
-      />
+      <View style={styles.passwordContainer}>
+        <TextInput
+          placeholder="Enter password"
+          placeholderTextColor="#9ca3af"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={secure}
+          style={styles.passwordInput}
+        />
+
+        <TouchableOpacity onPress={() => setSecure(!secure)}>
+          <Text style={styles.showText}>
+            {secure ? "Show" : "Hide"}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* 🚀 Submit Button */}
-      <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
-        <Text style={styles.btnText}>Create Admin</Text>
+      <TouchableOpacity
+        style={[styles.btn, loading && { opacity: 0.6 }]}
+        onPress={handleSubmit}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.btnText}>Create Admin</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -119,15 +168,34 @@ const styles = StyleSheet.create({
     borderColor: "#334155",
   },
 
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1e293b",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#334155",
+    marginBottom: 18,
+    paddingRight: 10,
+  },
+
+  passwordInput: {
+    flex: 1,
+    color: "#fff",
+    padding: 14,
+  },
+
+  showText: {
+    color: "#38bdf8",
+    fontWeight: "600",
+  },
+
   btn: {
     backgroundColor: "#22c55e",
     padding: 15,
     borderRadius: 12,
     alignItems: "center",
     marginTop: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
     elevation: 5,
   },
 
