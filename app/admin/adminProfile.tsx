@@ -93,9 +93,9 @@ export default function AdminProfile() {
     <View style={styles.container}>
       {/* 🔝 Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        {/* <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.backBtn}>⬅ Back</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity onPress={() => router.replace("/admin/dashboard")}>
           <Text style={styles.homeBtn}>🏠 Home</Text>

@@ -159,9 +159,9 @@ export default function AdminOrders() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.push("/admin/dashboard")}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.replace("/admin/dashboard")}>
+                 <Text style={styles.homeBtn}>🏠 Home</Text>
+               </TouchableOpacity>
         <Text style={styles.title}>Orders Management</Text>
         <Text style={styles.subtitle}>{orders.length} active orders</Text>
       </View>
@@ -200,6 +200,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 5,
+    padding: 30,
+    marginLeft: 25,
+  },
+  homeBtn: {
+    color: "#22c55e",
+    fontWeight: "600",
+    padding: 10,
   },
   backBtn: {
     position: 'absolute',

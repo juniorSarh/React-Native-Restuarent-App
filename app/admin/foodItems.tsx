@@ -124,10 +124,9 @@ export default function FoodAdminScreen() {
     <View style={styles.container}>
       {/* 🔝 Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.back}>⬅ Back</Text>
-        </TouchableOpacity>
-
+        <TouchableOpacity onPress={() => router.replace("/admin/dashboard")}>
+                  <Text style={styles.homeBtn}>🏠 Home</Text>
+                </TouchableOpacity>
         <Text style={styles.title}>Food Manager</Text>
       </View>
 
@@ -230,7 +229,7 @@ const styles = StyleSheet.create({
 
   back: { color: "#38bdf8", marginRight: 10 },
 
-  title: { color: "#fff", fontSize: 24, fontWeight: "700" },
+  title: { color: "#fff", fontSize: 24, fontWeight: "700", marginLeft: 25, padding: 30},
 
   addBtn: {
     position: "absolute",
@@ -278,6 +277,10 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 20,
     fontWeight: "700",
+  },
+   homeBtn: {
+    color: "#22c55e",
+    fontWeight: "600",
   },
 
   input: {

@@ -133,9 +133,9 @@ export default function AdminDashboard() {
             <Text style={styles.actionText}>📦 View Orders</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
+          {/* <TouchableOpacity style={styles.actionButton}>
             <Text style={styles.actionText}>👥 Manage Users</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={styles.actionButton}

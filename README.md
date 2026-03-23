@@ -56,18 +56,8 @@ npm start
   - Add and update food items
   - Manage restaurant details
   - View order history
-  - Analyze data using charts
+  - Add another admin
 
 ---
 
-## 🧩 Technical Requirements
-- React Native with reusable components
-- User Authentication
-- CRUD operations for menu and orders
-- Local and cloud storage for orders and user profiles
-- Payment integration (Stripe, PayPal, etc.)
-- Optional: Admin analytics and charts
-- Offline accessibility for menu browsing
-
----
 
