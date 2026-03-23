@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaViewBase } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -15,9 +16,11 @@ export default function HomeScreen() {
   }, [router]);
 
   return (
+    <SafeAreaView style={styles.container}>
     <View style={styles.container}>
       <Text style={styles.text}>Loading...</Text>
     </View>
+    </SafeAreaView>
   );
 }
 
