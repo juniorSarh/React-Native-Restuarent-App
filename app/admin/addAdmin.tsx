@@ -17,12 +17,12 @@ export default function AddAdmin() {
 
   const handleSubmit = async () => {
     if (!email || !password) {
-      return Alert.alert("Error", "Fill all fields");
+      return Alert.alert("Error", "Please fill in all fields");
     }
 
     try {
       await registerAdmin({ email, password });
-      Alert.alert("Success", "Admin created");
+      Alert.alert("Success", "Admin created successfully");
       router.back();
     } catch (err) {
       Alert.alert("Error", "Failed to create admin");
@@ -31,45 +31,109 @@ export default function AddAdmin() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Add Admin</Text>
+      {/* 🏠 Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.replace("/admin/dashboard")}>
+          <Text style={styles.homeBtn}>🏠 Home</Text>
+        </TouchableOpacity>
+      </View>
 
+      {/* 📌 Title */}
+      <Text style={styles.title}>Create Admin</Text>
+      <Text style={styles.subtitle}>
+        Add a new administrator to your system
+      </Text>
+
+      {/* 📧 Email */}
+      <Text style={styles.label}>Email</Text>
       <TextInput
-        placeholder="Email"
+        placeholder="Enter admin email"
+        placeholderTextColor="#9ca3af"
         value={email}
         onChangeText={setEmail}
         style={styles.input}
       />
 
+      {/* 🔑 Password */}
+      <Text style={styles.label}>Password</Text>
       <TextInput
-        placeholder="Password"
+        placeholder="Enter password"
+        placeholderTextColor="#9ca3af"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         style={styles.input}
       />
 
+      {/* 🚀 Submit Button */}
       <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
-        <Text style={styles.text}>Create Admin</Text>
+        <Text style={styles.btnText}>Create Admin</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#111827" },
-  title: { fontSize: 22, color: "#fff", marginBottom: 20 },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#0f172a",
+  },
+
+  header: {
+    marginBottom: 20,
+  },
+
+  homeBtn: {
+    color: "#38bdf8",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  title: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#ffffff",
+    marginBottom: 5,
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: "#9ca3af",
+    marginBottom: 25,
+  },
+
+  label: {
+    color: "#e5e7eb",
+    marginBottom: 6,
+    fontSize: 14,
+  },
+
   input: {
-    backgroundColor: "#1f2937",
+    backgroundColor: "#1e293b",
     color: "#fff",
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 15,
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: "#334155",
   },
+
   btn: {
-    backgroundColor: "#10b981",
-    padding: 12,
-    borderRadius: 10,
+    backgroundColor: "#22c55e",
+    padding: 15,
+    borderRadius: 12,
     alignItems: "center",
+    marginTop: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  text: { color: "#fff" },
+
+  btnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });
