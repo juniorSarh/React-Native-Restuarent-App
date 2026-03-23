@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Dimensions, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { loginUser } from '../../src/services/auth';
-import { isEmailValid } from '../../src/utils/validation';
 
 const { width, height } = Dimensions.get('window');
 
@@ -11,22 +10,8 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
- const handleLogin = async () => {
-  if (!email || !password) return Alert.alert("Error", "All fields required");
-  if (!isEmailValid(email)) return Alert.alert("Error", "Invalid email");
-
-  try {
-    const user = await loginUser(email, password);
-
-    // Redirect based on role
-    if (user.role === "admin") {
-      router.replace("/admin/dashboard"); // Admin dashboard
-    } else {
-      router.replace("/(tabs)/home"); // Regular user
-    }
-  } catch (err: any) {
-    Alert.alert("Login Failed", err.message);
-  }
+ const handleLogin = () => {
+  loginUser(email, password);
 };
 
   return (

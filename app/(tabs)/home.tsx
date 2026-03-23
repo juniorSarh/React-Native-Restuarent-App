@@ -1,18 +1,60 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { Dimensions, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import {
+  Dimensions,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../src/config/firebase';
 
 const { width, height } = Dimensions.get('window');
 
 export default function HomeTabScreen() {
   const router = useRouter();
 
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
   const logout = async () => {
     router.replace('/');
   };
 
+  // ✅ FETCH FROM COLLECTION
+  const getMenuItems = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'fooditems'));
+
+      const items: any[] = [];
+
+      querySnapshot.forEach((doc) => {
+        items.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      return items;
+    } catch (error) {
+      console.error('Error fetching menu items:', error);
+      return [];
+    }
+  };
+
+  const handleGetMenu = async () => {
+    setLoading(true);
+    const items = await getMenuItems();
+    setMenuItems(items);
+    setLoading(false);
+  };
+
   return (
     <ScrollView style={styles.container}>
+      {/* HEADER */}
       <View style={styles.header}>
         <Text style={styles.brandName}>Restaurant</Text>
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
@@ -20,86 +62,71 @@ export default function HomeTabScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* HERO */}
       <View style={styles.heroSection}>
-        <ImageBackground 
+        <ImageBackground
           source={require('../../assets/images/cassidy-mills-LPTUjv9l8BE-unsplash.jpg')}
           style={styles.heroImage}
           resizeMode="cover"
         >
           <View style={styles.heroOverlay}>
             <Text style={styles.welcomeTitle}>Welcome Back</Text>
-            <Text style={styles.welcomeSubtitle}>Your culinary journey continues</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Your culinary journey continues
+            </Text>
           </View>
         </ImageBackground>
       </View>
 
       <View style={styles.content}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today's Special</Text>
-          <View style={styles.card}>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Chef's Signature Dish</Text>
-              <Text style={styles.cardDescription}>A masterpiece crafted with the finest ingredients and culinary expertise</Text>
-              <TouchableOpacity style={styles.cardButton}>
-                <Text style={styles.cardButtonText}>Order Now</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
+        {/* QUICK ACTIONS */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
+
           <View style={styles.actionGrid}>
-            <TouchableOpacity style={styles.actionCard}>
+            <TouchableOpacity style={styles.actionCard} onPress={handleGetMenu}>
               <Text style={styles.actionIcon}>🍽️</Text>
               <Text style={styles.actionTitle}>Browse Menu</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.actionCard}>
               <Text style={styles.actionIcon}>📅</Text>
               <Text style={styles.actionTitle}>Reservations</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.actionCard}>
               <Text style={styles.actionIcon}>🍷</Text>
               <Text style={styles.actionTitle}>Wine Selection</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.actionCard}>
               <Text style={styles.actionIcon}>⭐</Text>
               <Text style={styles.actionTitle}>Reviews</Text>
             </TouchableOpacity>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Categories</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-            <TouchableOpacity style={styles.categoryCard}>
-              <Text style={styles.categoryEmoji}>🍕</Text>
-              <Text style={styles.categoryName}>Pizza</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.categoryCard}>
-              <Text style={styles.categoryEmoji}>🍜</Text>
-              <Text style={styles.categoryName}>Pasta</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.categoryCard}>
-              <Text style={styles.categoryEmoji}>🥗</Text>
-              <Text style={styles.categoryName}>Salads</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.categoryCard}>
-              <Text style={styles.categoryEmoji}>🍰</Text>
-              <Text style={styles.categoryName}>Desserts</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.categoryCard}>
-              <Text style={styles.categoryEmoji}>🍹</Text>
-              <Text style={styles.categoryName}>Cocktails</Text>
-            </TouchableOpacity>
-          </ScrollView>
+          {/* ✅ LOADING */}
+          {loading && (
+            <Text style={{ color: '#fff', textAlign: 'center', marginTop: 10 }}>
+              Loading menu...
+            </Text>
+          )}
+
+          {/* ✅ MENU DISPLAY */}
+          <View style={{ marginTop: 20 }}>
+            {menuItems.length === 0 && !loading ? (
+              <Text style={{ color: '#9ca3af', textAlign: 'center' }}>
+                No menu items found
+              </Text>
+            ) : (
+              menuItems.map((item) => (
+                <View key={item.id} style={styles.menuItem}>
+                  <Text style={styles.menuTitle}>{item.name}</Text>
+                  <Text style={styles.menuPrice}>R{item.price}</Text>
+                </View>
+              ))
+            )}
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -107,168 +134,87 @@ export default function HomeTabScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1a1a1a',
-  },
+  container: { flex: 1, backgroundColor: '#1a1a1a' },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 20,
     paddingTop: 60,
   },
+
   brandName: {
-    fontSize: 32,
-    fontWeight: '300',
-    color: '#FFFFFF',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
+    fontSize: 28,
+    color: '#fff',
   },
+
   logoutButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#333',
+    padding: 10,
+    borderRadius: 10,
   },
+
   logoutButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
+    color: '#fff',
   },
+
   heroSection: {
-    height: 250,
-    marginHorizontal: 20,
-    borderRadius: 16,
+    height: 200,
+    margin: 20,
+    borderRadius: 10,
     overflow: 'hidden',
-    marginBottom: 30,
   },
-  heroImage: {
-    flex: 1,
-    width: '100%',
-  },
+
+  heroImage: { flex: 1 },
+
   heroOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
-  welcomeTitle: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
-  },
-  welcomeSubtitle: {
-    fontSize: 16,
-    color: '#E0E0E0',
-    textAlign: 'center',
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  section: {
-    marginBottom: 30,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 20,
-  },
-  card: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
-  },
-  cardContent: {
-    alignItems: 'center',
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: '#B0B0B0',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  cardButton: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  cardButtonText: {
-    color: '#000000',
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
+
+  welcomeTitle: { color: '#fff', fontSize: 28 },
+  welcomeSubtitle: { color: '#ccc' },
+
+  content: { padding: 20 },
+
+  section: { marginBottom: 30 },
+
+  sectionTitle: { color: '#fff', fontSize: 22 },
+
   actionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
+
   actionCard: {
     width: '48%',
     backgroundColor: '#2a2a2a',
-    borderRadius: 12,
     padding: 20,
+    borderRadius: 10,
+    marginBottom: 10,
     alignItems: 'center',
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
   },
-  actionIcon: {
-    fontSize: 32,
+
+  actionIcon: { fontSize: 28 },
+  actionTitle: { color: '#fff' },
+
+  menuItem: {
+    backgroundColor: '#1f2937',
+    padding: 12,
+    borderRadius: 6,
     marginBottom: 10,
   },
-  actionTitle: {
-    fontSize: 14,
+
+  menuTitle: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
   },
-  categoryScroll: {
-    flexDirection: 'row',
-  },
-  categoryCard: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 12,
-    padding: 15,
-    alignItems: 'center',
-    marginRight: 15,
-    minWidth: 80,
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
-  },
-  categoryEmoji: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  categoryName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
+
+  menuPrice: {
+    color: '#9ca3af',
   },
 });

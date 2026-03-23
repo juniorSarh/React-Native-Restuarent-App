@@ -1,5 +1,14 @@
 import { auth, db } from "../config/firebase";
-import { doc, setDoc, deleteDoc, collection, getDocs, getDoc, serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  deleteDoc,
+  collection,
+  getDocs,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 /**
  * Check if current logged-in user is an admin
@@ -13,28 +22,28 @@ export const checkIsAdmin = async (): Promise<boolean> => {
 };
 
 /**
- * Check if a specific user is an admin
- */
-export const getAdmin = async (uid: string): Promise<boolean> => {
-  const snap = await getDoc(doc(db, "admins", uid));
-  return snap.exists();
-};
-
-/**
- * Add Admin with attributes
+ * Add Admin (NO PASSWORD)
  */
 export const addAdmin = async (
   uid: string,
   email: string,
-  password: string,
   role: string = "admin"
 ) => {
   await setDoc(doc(db, "admins", uid), {
     email,
-    password, // ⚠️ In production, never store plaintext passwords
     role,
     createdAt: serverTimestamp(),
   });
+};
+
+/**
+ * Update Admin
+ */
+export const updateAdmin = async (
+  uid: string,
+  data: { email?: string; role?: string }
+) => {
+  await updateDoc(doc(db, "admins", uid), data);
 };
 
 /**
@@ -45,9 +54,12 @@ export const removeAdmin = async (uid: string) => {
 };
 
 /**
- * Get all Admins
+ * Get all admins
  */
 export const getAdminList = async (): Promise<any[]> => {
   const snapshot = await getDocs(collection(db, "admins"));
-  return snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({
+    uid: doc.id,
+    ...doc.data(),
+  }));
 };
