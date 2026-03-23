@@ -13,9 +13,12 @@ import { CartItem, useCart } from '../context/CartContext';
 
 // Sample data - in real app, this would come from the food item
 const sampleDrinkOptions = [
-  { id: 'coke', name: 'Coke', price: 25, included: false },
-  { id: 'fanta', name: 'Fanta', price: 25, included: false },
-  { id: 'water', name: 'Water', price: 15, included: false },
+  { id: 'coke', name: 'Coke - 500ml', price: 25, included: false },
+  { id: 'water', name: 'Water-500ml', price: 15, included: false },
+  { id: 'juice', name: 'Juice - 500ml', price: 30, included: false },
+  { id: 'tea', name: 'Tea', price: 20, included: false },
+  { id: 'coffee', name: 'Coffee', price: 40, included: false },
+  { id: 'wine', name: 'Wine (glass)', price: 50, included: false },
 ];
 
 interface FoodCustomizationModalProps {

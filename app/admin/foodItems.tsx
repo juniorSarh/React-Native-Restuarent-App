@@ -156,9 +156,20 @@ export default function FoodAdminScreen() {
               <Text style={styles.edit}>Edit</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => deleteFoodItem(item.id)}>
-              <Text style={styles.delete}>Delete</Text>
-            </TouchableOpacity>
+            <TouchableOpacity
+  onPress={() => {
+    Alert.alert(
+      "Confirm",
+      "Are you sure you want to delete this item?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: () => deleteFoodItem(item.id) },
+      ]
+    );
+  }}
+>
+  <Text style={styles.delete}>Delete</Text>
+</TouchableOpacity>
           </View>
         )}
       />
@@ -175,9 +186,9 @@ export default function FoodAdminScreen() {
           <TextInput placeholder="Price" style={styles.input} value={price} onChangeText={setPrice} keyboardType="numeric" />
           <TextInput placeholder="Category" style={styles.input} value={category} onChangeText={setCategory} />
 
-          <TouchableOpacity style={styles.imageBtn} onPress={pickImage}>
+          {/* <TouchableOpacity style={styles.imageBtn} onPress={pickImage}>
             <Text style={{ color: "#fff" }}>Pick Image</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TextInput
             placeholder="Or Image URL"
