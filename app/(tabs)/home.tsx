@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dimensions,
   ImageBackground,
@@ -9,48 +9,64 @@ import {
   TouchableOpacity,
   View,
   Animated,
+  TextInput,
 } from 'react-native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../src/config/firebase';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { signOut } from "firebase/auth";
+import { auth } from "../../src/config/firebase";
 
 const { width } = Dimensions.get('window');
 
 export default function HomeTabScreen() {
   const router = useRouter();
   const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [filteredItems, setFilteredItems] = useState<any[]>([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const logout = async () => router.replace('/');
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Fetch Menu Items
+  const logout = async () => {
+  await signOut(auth);
+};
+
+  // Fetch Menu
   const getMenuItems = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'fooditems'));
-      const items: any[] = [];
-      querySnapshot.forEach((doc) => {
-        items.push({ id: doc.id, ...doc.data() });
-      });
-      return items;
-    } catch (error) {
-      console.error('Error fetching menu items:', error);
-      return [];
-    }
+    const querySnapshot = await getDocs(collection(db, 'fooditems'));
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   };
 
   const handleGetMenu = async () => {
     setLoading(true);
     const items = await getMenuItems();
     setMenuItems(items);
+    setFilteredItems(items);
     setLoading(false);
+
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
   };
+
+  // 🔍 Search filter
+  useEffect(() => {
+    const filtered = menuItems.filter((item) =>
+      item.name?.toLowerCase().includes(search.toLowerCase())
+    );
+    setFilteredItems(filtered);
+  }, [search]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        
         {/* HEADER */}
         <View style={styles.header}>
-          <Text style={styles.brandName}>🍴 DineHub</Text>
+          <Text style={styles.brandName}>🍴 The DineHub</Text>
           <TouchableOpacity style={styles.logoutButton} onPress={logout}>
             <Text style={styles.logoutButtonText}>Sign Out</Text>
           </TouchableOpacity>
@@ -61,61 +77,96 @@ export default function HomeTabScreen() {
           <ImageBackground
             source={require('../../assets/images/cassidy-mills-LPTUjv9l8BE-unsplash.jpg')}
             style={styles.heroImage}
-            resizeMode="cover"
           >
             <View style={styles.heroOverlay}>
-              <Text style={styles.welcomeTitle}>Welcome Back!</Text>
+              <Text style={styles.welcomeTitle}>Welcome Back 👋</Text>
               <Text style={styles.welcomeSubtitle}>
-                Explore the finest dishes curated for you
+                Discover amazing meals curated for you
               </Text>
               <TouchableOpacity style={styles.exploreBtn} onPress={handleGetMenu}>
-                <Text style={styles.exploreBtnText}>Browse Menu 🍽️</Text>
+                <Text style={styles.exploreBtnText}>Browse Menu</Text>
               </TouchableOpacity>
             </View>
           </ImageBackground>
         </View>
 
-        {/* QUICK ACTIONS */}
+        {/* 🔍 SEARCH */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.actionGrid}>
-            {[
-              { icon: '🍽️', title: 'Browse Menu', onPress: handleGetMenu, colors: ['#22c55e', '#16a34a'] },
-              { icon: '📅', title: 'Reservations', onPress: () => {}, colors: ['#3b82f6', '#2563eb'] },
-              { icon: '🍷', title: 'Wine Selection', onPress: () => {}, colors: ['#f59e0b', '#d97706'] },
-              { icon: '⭐', title: 'Reviews', onPress: () => {}, colors: ['#f43f5e', '#e11d48'] },
-            ].map((item, idx) => (
-              <TouchableOpacity
-                key={idx}
-                style={[styles.actionCard, { backgroundColor: item.colors[0] }]}
-                onPress={item.onPress}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.actionIcon}>{item.icon}</Text>
-                <Text style={styles.actionTitle}>{item.title}</Text>
-              </TouchableOpacity>
-            ))}
+          <TextInput
+            placeholder="Search food..."
+            placeholderTextColor="#9ca3af"
+            value={search}
+            onChangeText={setSearch}
+            style={styles.searchInput}
+          />
+        </View>
+
+        {/* 📊 QUICK STATS */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Overview</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{menuItems.length}</Text>
+              <Text style={styles.statLabel}>Menu Items</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>⭐ 4.8</Text>
+              <Text style={styles.statLabel}>Rating</Text>
+            </View>
           </View>
         </View>
 
-        {/* MENU DISPLAY */}
+        {/* ⚡ QUICK ACTIONS */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.actionGrid}>
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#22c55e' }]} onPress={handleGetMenu}>
+              <Text style={styles.actionIcon}>🍽️</Text>
+              <Text style={styles.actionTitle}>Browse Menu</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#3b82f6' }]} onPress={() => router.push('/(tabs)/orders')}>
+              <Text style={styles.actionIcon}>📦</Text>
+              <Text style={styles.actionTitle}>My Orders</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#f59e0b' }]} onPress={() => router.push('/(tabs)/profile')}>
+              <Text style={styles.actionIcon}>👤</Text>
+              <Text style={styles.actionTitle}>Profile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.actionCard, { backgroundColor: '#f43f5e' }]} onPress={() => router.push('/(tabs)/home')}>
+              <Text style={styles.actionIcon}>⭐</Text>
+              <Text style={styles.actionTitle}>Reviews</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* 🍔 MENU */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Menu</Text>
+
           {loading && <Text style={styles.loadingText}>Loading menu...</Text>}
-          {menuItems.length === 0 && !loading ? (
-            <Text style={styles.noMenu}>No menu items found</Text>
-          ) : (
-            menuItems.map((item) => (
+
+          {!loading && filteredItems.length === 0 && (
+            <Text style={styles.noMenu}>No items found</Text>
+          )}
+
+          <Animated.View style={{ opacity: fadeAnim }}>
+            {filteredItems.map((item) => (
               <View key={item.id} style={styles.menuItem}>
-                {item.imageUrl && <Animated.Image source={{ uri: item.imageUrl }} style={styles.menuImage} />}
+                {item.imageUrl && (
+                  <Animated.Image source={{ uri: item.imageUrl }} style={styles.menuImage} />
+                )}
                 <View style={styles.menuText}>
                   <Text style={styles.menuTitle}>{item.name}</Text>
                   <Text style={styles.menuPrice}>R {item.price}</Text>
                 </View>
               </View>
-            ))
-          )}
+            ))}
+          </Animated.View>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -127,85 +178,99 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 10,
-    alignItems: 'center',
+    padding: 20,
   },
 
-  brandName: { fontSize: 28, fontWeight: '700', color: '#fff' },
+  brandName: { fontSize: 26, fontWeight: '700', color: '#fff' },
 
   logoutButton: {
     backgroundColor: '#1e293b',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
+    padding: 10,
+    borderRadius: 10,
   },
-  logoutButtonText: { color: '#fff', fontWeight: '600' },
+  menuText: {
+    flex: 1,
+  },
+
+  logoutButtonText: { color: '#fff' },
 
   heroSection: {
-    width: width - 40,
     height: 220,
-    marginHorizontal: 20,
+    margin: 20,
     borderRadius: 20,
     overflow: 'hidden',
-    marginBottom: 20,
   },
 
   heroImage: { flex: 1 },
+
   heroOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
   },
 
-  welcomeTitle: { color: '#fff', fontSize: 28, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
-  welcomeSubtitle: { color: '#e5e7eb', fontSize: 16, marginBottom: 15, textAlign: 'center' },
+  welcomeTitle: { color: '#fff', fontSize: 26, fontWeight: '700' },
+  welcomeSubtitle: { color: '#e5e7eb', marginBottom: 10 },
 
   exploreBtn: {
     backgroundColor: '#22c55e',
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 25,
+    padding: 12,
+    borderRadius: 20,
   },
+
   exploreBtnText: { color: '#fff', fontWeight: '700' },
 
-  section: { marginBottom: 25, paddingHorizontal: 20 },
+  section: { paddingHorizontal: 20, marginBottom: 20 },
 
-  sectionTitle: { color: '#fff', fontSize: 22, fontWeight: '700', marginBottom: 12 },
+  sectionTitle: { color: '#fff', fontSize: 20, fontWeight: '700', marginBottom: 10 },
+
+  searchInput: {
+    backgroundColor: '#1e293b',
+    color: '#fff',
+    padding: 12,
+    borderRadius: 10,
+  },
+
+  statsRow: { flexDirection: 'row', justifyContent: 'space-between' },
+
+  statCard: {
+    backgroundColor: '#1e293b',
+    padding: 20,
+    borderRadius: 12,
+    width: '48%',
+    alignItems: 'center',
+  },
+
+  statNumber: { color: '#22c55e', fontSize: 18, fontWeight: '700' },
+  statLabel: { color: '#9ca3af' },
 
   actionGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
 
   actionCard: {
     width: '48%',
-    paddingVertical: 25,
+    padding: 20,
     borderRadius: 15,
-    marginBottom: 12,
-    justifyContent: 'center',
+    marginBottom: 10,
     alignItems: 'center',
-    elevation: 5,
   },
 
-  actionIcon: { fontSize: 28, marginBottom: 8, color: '#fff' },
-  actionTitle: { color: '#fff', fontWeight: '600', textAlign: 'center' },
-
-  loadingText: { color: '#9ca3af', textAlign: 'center', marginTop: 10 },
-  noMenu: { color: '#9ca3af', textAlign: 'center', marginTop: 10 },
+  actionIcon: { fontSize: 24 },
+  actionTitle: { color: '#fff', marginTop: 5 },
 
   menuItem: {
     flexDirection: 'row',
     backgroundColor: '#1e293b',
-    borderRadius: 15,
-    marginBottom: 12,
-    overflow: 'hidden',
-    alignItems: 'center',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
   },
 
-  menuImage: { width: 80, height: 80, borderRadius: 10, marginRight: 15 },
+  menuImage: { width: 70, height: 70, borderRadius: 10, marginRight: 10 },
 
-  menuText: { flex: 1 },
-  menuTitle: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  menuPrice: { color: '#a1a1aa', marginTop: 4 },
+  menuTitle: { color: '#fff', fontWeight: '700' },
+  menuPrice: { color: '#9ca3af' },
+
+  loadingText: { color: '#9ca3af', textAlign: 'center' },
+  noMenu: { color: '#9ca3af', textAlign: 'center' },
 });
