@@ -29,8 +29,8 @@ export default function HomeTabScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const logout = async () => {
-  await signOut(auth);
-};
+    await signOut(auth);
+  };
 
   // Fetch Menu
   const getMenuItems = async () => {
@@ -75,7 +75,7 @@ export default function HomeTabScreen() {
         {/* HERO */}
         <View style={styles.heroSection}>
           <ImageBackground
-            source={require('../../assets/images/cassidy-mills-LPTUjv9l8BE-unsplash.jpg')}
+            source={{ uri: "https://images.unsplash.com/photo-1504674900247-0877df9cc836" }}
             style={styles.heroImage}
           >
             <View style={styles.heroOverlay}>
@@ -142,6 +142,42 @@ export default function HomeTabScreen() {
           </View>
         </View>
 
+        {/* 🍱 FOOD CATEGORIES */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Categories</Text>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {[
+              { name: "Pizza", image: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092" },
+              { name: "Burgers", image: "https://images.unsplash.com/photo-1550547660-d9450f859349" },
+              { name: "Drinks", image: "https://images.unsplash.com/photo-1544145945-f90425340c7e" },
+              { name: "Desserts", image: "https://images.unsplash.com/photo-1551024601-bec78aea704b" },
+              { name: "Seafood", image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836" },
+            ].map((category, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.categoryCard}
+                onPress={() => {
+                  const filtered = menuItems.filter(
+                    (item) => item.category === category.name
+                  );
+                  setFilteredItems(filtered);
+                }}
+              >
+                <ImageBackground
+                  source={{ uri: category.image }}
+                  style={styles.categoryImage}
+                  imageStyle={{ borderRadius: 15 }}
+                >
+                  <View style={styles.categoryOverlay}>
+                    <Text style={styles.categoryText}>{category.name}</Text>
+                  </View>
+                </ImageBackground>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
         {/* 🍔 MENU */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Menu</Text>
@@ -187,9 +223,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e293b',
     padding: 10,
     borderRadius: 10,
-  },
-  menuText: {
-    flex: 1,
   },
 
   logoutButtonText: { color: '#fff' },
@@ -258,6 +291,30 @@ const styles = StyleSheet.create({
   actionIcon: { fontSize: 24 },
   actionTitle: { color: '#fff', marginTop: 5 },
 
+  categoryCard: {
+    width: 120,
+    height: 140,
+    marginRight: 12,
+    borderRadius: 15,
+    overflow: "hidden",
+  },
+
+  categoryImage: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+
+  categoryOverlay: {
+    backgroundColor: "rgba(0,0,0,0.4)",
+    padding: 10,
+  },
+
+  categoryText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
   menuItem: {
     flexDirection: 'row',
     backgroundColor: '#1e293b',
@@ -267,6 +324,8 @@ const styles = StyleSheet.create({
   },
 
   menuImage: { width: 70, height: 70, borderRadius: 10, marginRight: 10 },
+
+  menuText: { flex: 1 },
 
   menuTitle: { color: '#fff', fontWeight: '700' },
   menuPrice: { color: '#9ca3af' },
