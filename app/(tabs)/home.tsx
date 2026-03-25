@@ -83,7 +83,7 @@ export default function HomeTabScreen() {
               <Text style={styles.welcomeSubtitle}>
                 Discover amazing meals curated for you
               </Text>
-              <TouchableOpacity style={styles.exploreBtn} onPress={handleGetMenu}>
+              <TouchableOpacity style={styles.exploreBtn} onPress={() => router.push('/(tabs)/menu')}>
                 <Text style={styles.exploreBtnText}>Browse Menu</Text>
               </TouchableOpacity>
             </View>
