@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }: any) => {
         const uid = firebaseUser.uid;
 
         // 🔍 Check Admin
-        const adminSnap = await getDoc(doc(db, "admins", uid));
+        const adminSnap =await getDoc(doc(db, "admins", uid));
         if (adminSnap.exists()) {
           router.replace("/admin/dashboard");
           setLoading(false);

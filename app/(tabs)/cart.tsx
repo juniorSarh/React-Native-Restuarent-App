@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
 } from 'react-native';
 import { Checkout } from '../../src/components/Checkout';
 import FoodCustomizationModal from '../../src/components/FoodCustomizationModal';
@@ -31,17 +32,72 @@ export default function CartScreen() {
 
   const cartTotal = items.reduce((sum, i) => sum + calculateItemTotal(i), 0);
 
+  // ✅ Quantity Handlers
+  const increaseQty = (item: CartItem) => {
+    updateCartItem(item.cartItemId, {
+      ...item,
+      quantity: item.quantity + 1,
+    });
+  };
+
+  const decreaseQty = (item: CartItem) => {
+    if (item.quantity === 1) {
+      removeFromCart(item.cartItemId);
+    } else {
+      updateCartItem(item.cartItemId, {
+        ...item,
+        quantity: item.quantity - 1,
+      });
+    }
+  };
+
   const renderItem = ({ item }: { item: CartItem }) => (
     <View style={styles.card}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.price}>R {calculateItemTotal(item).toFixed(2)}</Text>
-      </View>
+      <View style={styles.row}>
+        {/* Image */}
+        {item.imageUrl ? (
+          <Image source={{ uri: item.imageUrl }} style={styles.image} />
+        ) : (
+          <View style={styles.placeholder}>
+            <Text style={{ color: '#94a3b8' }}>No Image</Text>
+          </View>
+        )}
 
-      {/* Quantity */}
-      <View style={styles.badge}>
-        <Text style={styles.qty}>Qty: {item.quantity}</Text>
+        {/* Info */}
+        <View style={styles.info}>
+          <View style={styles.header}>
+            <Text style={styles.name}>{item.name}</Text>
+            <Text style={styles.price}>
+              R {calculateItemTotal(item).toFixed(2)}
+            </Text>
+          </View>
+
+          {/* Description */}
+          {item.description && (
+            <Text style={styles.description} numberOfLines={2}>
+              {item.description}
+            </Text>
+          )}
+
+          {/* Quantity Controls */}
+          <View style={styles.qtyRow}>
+            <TouchableOpacity
+              style={styles.qtyBtn}
+              onPress={() => decreaseQty(item)}
+            >
+              <Text style={styles.qtyBtnText}>−</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.qtyNumber}>{item.quantity}</Text>
+
+            <TouchableOpacity
+              style={styles.qtyBtn}
+              onPress={() => increaseQty(item)}
+            >
+              <Text style={styles.qtyBtnText}>＋</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {/* Customization */}
@@ -100,9 +156,7 @@ export default function CartScreen() {
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>🧺</Text>
           <Text style={styles.empty}>Your cart is empty</Text>
-          <Text style={styles.emptySub}>
-            Add items to get started
-          </Text>
+          <Text style={styles.emptySub}>Add items to get started</Text>
         </View>
       ) : (
         <>
@@ -114,7 +168,6 @@ export default function CartScreen() {
             contentContainerStyle={{ paddingBottom: 140 }}
           />
 
-          {/* Footer */}
           <View style={styles.footer}>
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Total</Text>
@@ -132,7 +185,6 @@ export default function CartScreen() {
         </>
       )}
 
-      {/* EDIT MODAL */}
       {editingItem && (
         <FoodCustomizationModal
           visible={true}
@@ -165,26 +217,24 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '700',
     color: '#f8fafc',
-    margin: 2,
-    padding: 5,
-    marginTop:25
+    marginTop: 25,
   },
 
   emptyContainer: {
     alignItems: 'center',
-    margin: 80,
-    padding: 20,
+    marginTop: 80,
   },
 
   emptyIcon: {
     fontSize: 50,
-    marginBottom: 10,
   },
+
   empty: {
     color: '#cbd5f5',
     fontSize: 16,
     fontWeight: '600',
   },
+
   emptySub: {
     color: '#64748b',
     marginTop: 4,
@@ -195,10 +245,30 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     marginBottom: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
+  },
+
+  row: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+
+  image: {
+    width: 70,
+    height: 70,
+    borderRadius: 12,
+  },
+
+  placeholder: {
+    width: 70,
+    height: 70,
+    borderRadius: 12,
+    backgroundColor: '#334155',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  info: {
+    flex: 1,
   },
 
   header: {
@@ -208,7 +278,6 @@ const styles = StyleSheet.create({
 
   name: {
     color: '#f1f5f9',
-    fontSize: 16,
     fontWeight: '700',
   },
 
@@ -217,23 +286,42 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  badge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#334155',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    marginTop: 6,
+  description: {
+    color: '#94a3b8',
+    fontSize: 12,
+    marginTop: 4,
   },
 
-  qty: {
-    color: '#e2e8f0',
-    fontSize: 12,
+  qtyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    gap: 10,
+  },
+
+  qtyBtn: {
+    backgroundColor: '#334155',
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  qtyBtnText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+
+  qtyNumber: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 
   customization: {
     marginTop: 10,
-    gap: 4,
   },
 
   customText: {
@@ -287,7 +375,6 @@ const styles = StyleSheet.create({
 
   totalLabel: {
     color: '#94a3b8',
-    fontSize: 14,
   },
 
   total: {

@@ -13,6 +13,7 @@ export interface CartItem {
   name: string;
   basePrice: number;
   quantity: number;
+  description?: string
   imageUrl?: string;
   customization: CartCustomization;
 }
