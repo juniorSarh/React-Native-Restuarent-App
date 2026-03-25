@@ -57,6 +57,11 @@ npm start
   - Manage restaurant details
   - View order history
   - Add another admin
+ 
+### Admin log-in
+```
+username: xy@gmail.com
+password: 123456
 
 ---
 
