@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Checkout } from '../../src/components/Checkout';
 import FoodCustomizationModal from '../../src/components/FoodCustomizationModal';
@@ -19,7 +19,7 @@ export default function CartScreen() {
     let total = item.basePrice;
 
     item.customization.selectedDrinks.forEach(() => {
-      total += 25; // example drink price
+      total += 25;
     });
 
     item.customization.extras.forEach(e => {
@@ -33,24 +33,28 @@ export default function CartScreen() {
 
   const renderItem = ({ item }: { item: CartItem }) => (
     <View style={styles.card}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.price}>R {calculateItemTotal(item).toFixed(2)}</Text>
       </View>
 
-      <Text style={styles.qty}>Quantity: {item.quantity}</Text>
+      {/* Quantity */}
+      <View style={styles.badge}>
+        <Text style={styles.qty}>Qty: {item.quantity}</Text>
+      </View>
 
-      {/* Customization Summary */}
+      {/* Customization */}
       <View style={styles.customization}>
         {item.customization.selectedDrinks.length > 0 && (
           <Text style={styles.customText}>
-            Drinks: {item.customization.selectedDrinks.join(', ')}
+            🥤 {item.customization.selectedDrinks.join(', ')}
           </Text>
         )}
 
         {item.customization.extras.length > 0 && (
           <Text style={styles.customText}>
-            Extras:{' '}
+            ➕{' '}
             {item.customization.extras
               .map(e => `${e.id} x${e.quantity}`)
               .join(', ')}
@@ -59,7 +63,7 @@ export default function CartScreen() {
 
         {item.customization.specialInstructions && (
           <Text style={styles.customText}>
-            Notes: {item.customization.specialInstructions}
+            📝 {item.customization.specialInstructions}
           </Text>
         )}
       </View>
@@ -90,27 +94,39 @@ export default function CartScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your Cart</Text>
+      <Text style={styles.title}>🛒 Your Cart</Text>
 
       {items.length === 0 ? (
-        <Text style={styles.empty}>Your cart is empty</Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>🧺</Text>
+          <Text style={styles.empty}>Your cart is empty</Text>
+          <Text style={styles.emptySub}>
+            Add items to get started
+          </Text>
+        </View>
       ) : (
         <>
           <FlatList
             data={items}
             keyExtractor={i => i.cartItemId}
             renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 120 }}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 140 }}
           />
 
+          {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.total}>Total: R {cartTotal.toFixed(2)}</Text>
-            <Checkout 
-              items={items} 
-              total={cartTotal} 
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.total}>R {cartTotal.toFixed(2)}</Text>
+            </View>
+
+            <Checkout
+              items={items}
+              total={cartTotal}
               onSuccess={() => {
                 clearCart();
-              }} 
+              }}
             />
           </View>
         </>
@@ -139,42 +155,144 @@ export default function CartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#1a1a1a' },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 20 },
-  empty: { color: '#aaa', textAlign: 'center', marginTop: 50 },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#0f172a',
+  },
+
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#f8fafc',
+    margin: 2,
+    padding: 5,
+    marginTop:25
+  },
+
+  emptyContainer: {
+    alignItems: 'center',
+    margin: 80,
+    padding: 20,
+  },
+
+  emptyIcon: {
+    fontSize: 50,
+    marginBottom: 10,
+  },
+  empty: {
+    color: '#cbd5f5',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptySub: {
+    color: '#64748b',
+    marginTop: 4,
+  },
 
   card: {
-    backgroundColor: '#2a2a2a',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
+    backgroundColor: '#1e293b',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  header: { flexDirection: 'row', justifyContent: 'space-between' },
-  name: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  price: { color: '#4fc3f7', fontWeight: 'bold' },
-  qty: { color: '#ccc', marginTop: 5 },
 
-  customization: { marginTop: 8 },
-  customText: { color: '#aaa', fontSize: 12 },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
 
-  actions: { flexDirection: 'row', marginTop: 12, gap: 10 },
-  editBtn: { flex: 1, backgroundColor: '#2196f3', padding: 10, borderRadius: 6 },
-  removeBtn: { flex: 1, backgroundColor: '#f44336', padding: 10, borderRadius: 6 },
-  btnText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+  name: {
+    color: '#f1f5f9',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  price: {
+    color: '#38bdf8',
+    fontWeight: '700',
+  },
+
+  badge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#334155',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginTop: 6,
+  },
+
+  qty: {
+    color: '#e2e8f0',
+    fontSize: 12,
+  },
+
+  customization: {
+    marginTop: 10,
+    gap: 4,
+  },
+
+  customText: {
+    color: '#94a3b8',
+    fontSize: 12,
+  },
+
+  actions: {
+    flexDirection: 'row',
+    marginTop: 14,
+    gap: 10,
+  },
+
+  editBtn: {
+    flex: 1,
+    backgroundColor: '#3b82f6',
+    paddingVertical: 10,
+    borderRadius: 999,
+    alignItems: 'center',
+  },
+
+  removeBtn: {
+    flex: 1,
+    backgroundColor: '#ef4444',
+    paddingVertical: 10,
+    borderRadius: 999,
+    alignItems: 'center',
+  },
+
+  btnText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
 
   footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#000',
+    backgroundColor: '#020617',
     padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
-  total: { color: '#fff', fontSize: 18, marginBottom: 10 },
-  checkoutBtn: {
-    backgroundColor: '#4caf50',
-    padding: 15,
-    borderRadius: 8,
+
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
   },
-  checkoutText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+
+  totalLabel: {
+    color: '#94a3b8',
+    fontSize: 14,
+  },
+
+  total: {
+    color: '#f8fafc',
+    fontSize: 20,
+    fontWeight: '700',
+  },
 });
