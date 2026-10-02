@@ -2,6 +2,7 @@
   "name": "react-native-restuarent-app",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "react-native": "dist/rn/index.js",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
